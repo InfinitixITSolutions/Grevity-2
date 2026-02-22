@@ -1,0 +1,78 @@
+@model IEnumerable<Grevity.Models.Entities.BusinessSetting>
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h2 class="h3 mb-1">Manage Companies</h2>
+        <p class="text-muted">Register and switch between multiple business entities.</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a asp-action="Index" asp-route-id="0" class="btn btn-purple rounded-pill px-4 shadow-sm fw-bold">
+            <span class="material-symbols-outlined align-middle me-1">add_business</span> New Registration
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden mb-5">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4 py-3">Business Entity</th>
+                    <th>GSTIN / Tax ID</th>
+                    <th>Location</th>
+                    <th>Primary Email</th>
+                    <th class="text-center pe-4">Control Panel</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var company in Model)
+                {
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="p-2 rounded-3 bg-purple-light text-primary me-3">
+                                    <span class="material-symbols-outlined" style="font-size: 1.5rem">corporate_fare</span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold fs-6">@company.CompanyName</div>
+                                    <div class="text-muted x-small text-uppercase ls-1">Active Profile</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark fw-bold border">@company.GSTIN</span>
+                        </td>
+                        <td>
+                            <div class="small fw-semibold">@company.City</div>
+                            <div class="text-muted x-small">Headquarters</div>
+                        </td>
+                        <td>
+                            <div class="small">@company.Email</div>
+                        </td>
+                        <td class="text-center pe-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <form asp-controller="Account" asp-action="SwitchCompany" method="post" class="d-inline">
+                                    <input type="hidden" name="companyId" value="@company.Id" />
+                                    <button type="submit" class="btn btn-light btn-sm text-info" title="Switch to this Company">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">sync_alt</span>
+                                    </button>
+                                </form>
+                                <a asp-action="Index" asp-route-id="@company.Id" class="btn btn-light btn-sm text-warning" title="Business Settings">
+                                    <span class="material-symbols-outlined" style="font-size: 1.2rem">settings</span>
+                                </a>
+                                <button type="button" class="btn btn-light btn-sm text-danger" title="Delete Profile" 
+                                        onclick="confirmDelete('@Url.Action("Delete", new { id = company.Id })', 'Are you sure you want to delete @company.CompanyName? This will permanently remove ALL invoices, products, customers, and other data associated with this company.')">
+                                    <span class="material-symbols-outlined" style="font-size: 1.2rem">delete_forever</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

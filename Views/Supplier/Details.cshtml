@@ -1,0 +1,111 @@
+@model Grevity.Models.Entities.Supplier
+
+@{
+    ViewData["Title"] = "Supplier: " + Model.Name;
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Suppliers</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+            </ol>
+        </nav>
+        <h2 class="h3 mb-0 fw-bold">Vendor Intelligence</h2>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="d-flex gap-2 justify-content-md-end">
+            <a asp-action="Index" class="btn btn-light rounded-pill px-3">
+                <span class="material-symbols-outlined align-middle me-1">local_shipping</span> Partners
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-purple rounded-pill px-4 shadow-sm">
+                <span class="material-symbols-outlined align-middle me-1">edit_square</span> Edit Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="p-5 bg-purple-light text-center">
+                <div class="rounded-4 bg-white shadow-sm d-inline-block p-4 mb-3">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 4rem">factory</span>
+                </div>
+                <h4 class="fw-bold mb-1">@Model.Name</h4>
+                <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill x-small text-uppercase ls-1">Registered Vendor</div>
+            </div>
+            <div class="card-body p-4">
+                @if (ViewBag.IsGSTEnabled != false)
+                {
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="material-symbols-outlined text-muted me-3">verified_user</span>
+                        <div>
+                            <div class="text-muted x-small text-uppercase ls-1">GST Registration</div>
+                            <div class="fw-bold fw-monospace small">@(string.IsNullOrEmpty(Model.GSTIN) ? "URD (Unregistered)" : Model.GSTIN)</div>
+                        </div>
+                    </div>
+                }
+                <div class="d-flex align-items-center">
+                    <span class="material-symbols-outlined text-muted me-3">location_city</span>
+                    <div>
+                        <div class="text-muted x-small text-uppercase ls-1">Registered Office</div>
+                        <div class="small">@Model.Address</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <div class="d-flex align-items-center mb-4">
+                <span class="material-symbols-outlined text-primary me-2">quick_contact_dial</span>
+                <h5 class="mb-0 fw-bold">Procurement Contact</h5>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-light d-flex align-items-center">
+                        <div class="p-2 rounded-3 bg-white shadow-sm me-3 text-success">
+                            <span class="material-symbols-outlined">phone_in_talk</span>
+                        </div>
+                        <div>
+                            <div class="text-muted x-small text-uppercase ls-1">Official #</div>
+                            <div class="fw-bold">@Model.Mobile</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-light d-flex align-items-center">
+                        <div class="p-2 rounded-3 bg-white shadow-sm me-3 text-info">
+                            <span class="material-symbols-outlined">alternate_email</span>
+                        </div>
+                        <div>
+                            <div class="text-muted x-small text-uppercase ls-1">Direct Email</div>
+                            <div class="fw-bold small">@Model.Email</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <div class="d-flex align-items-center mb-4">
+                <span class="material-symbols-outlined text-primary me-2">inventory</span>
+                <h5 class="mb-0 fw-bold">Recent Inward Supply</h5>
+            </div>
+            <div class="p-5 text-center bg-light rounded-4">
+                <span class="material-symbols-outlined display-4 text-muted mb-2">request_quote</span>
+                <p class="text-muted mb-0">Purchase bill history will appear here once inward transactions are recorded.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+    .bg-purple-light { background-color: var(--md-primary-light); }
+</style>

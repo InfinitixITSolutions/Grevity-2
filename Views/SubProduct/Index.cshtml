@@ -1,0 +1,71 @@
+@model IEnumerable<Grevity.Models.Entities.SubProduct>
+
+@{
+    ViewData["Title"] = "Sub Products";
+}
+
+<div class="card border-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+        <h4 class="mb-0">Sub Products (Raw Materials)</h4>
+        <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+            <span class="material-symbols-outlined me-2">add_box</span> Add New Sub Product
+        </a>
+    </div>
+    <div class="card-body pt-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Name</th>
+                        <th>Unit</th>
+                        <th class="text-end">Current Stock</th>
+                        <th class="text-end">Purchase Price</th>
+                        <th class="text-end">Low Stock Alert</th>
+                        <th class="text-center pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var isLowStock = item.CurrentStock <= item.LowStockAlertLimit;
+                        <tr class="@(isLowStock ? "table-warning" : "")">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-circle bg-purple-light text-primary me-3">
+                                        <span class="material-symbols-outlined" style="font-size: 1.25rem">inventory</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold fs-6">@item.Name</div>
+                                        @if (item.Description != null)
+                                        {
+                                            <small class="text-muted">@item.Description</small>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@item.Unit</td>
+                            <td class="text-end">
+                                <span class="badge @(isLowStock ? "bg-danger" : "bg-success") bg-opacity-10 text-@(isLowStock ? "danger" : "success")">
+                                    @item.CurrentStock @item.Unit
+                                </span>
+                            </td>
+                            <td class="text-end">@(item.PurchasePrice?.ToString("C") ?? "N/A")</td>
+                            <td class="text-end">@item.LowStockAlertLimit @item.Unit</td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-warning" title="Edit">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">edit</span>
+                                    </a>
+                                    <button type="button" class="btn btn-light btn-sm d-flex align-items-center text-danger" title="Delete"
+                                            onclick="confirmDelete('@Url.Action("Delete", new { id = item.Id })', 'Do you want to delete @item.Name?')">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

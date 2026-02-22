@@ -1,0 +1,133 @@
+@model IEnumerable<Grevity.Models.Entities.AuditLog>
+
+<div class="row mb-4 align-items-center">
+    <div class="col-6">
+        <h2 class="h3 mb-0">System Audit Logs</h2>
+        <p class="text-muted small mb-0">Tracking administrative actions and system events.</p>
+    </div>
+    <div class="col-6 text-end">
+        <button class="btn btn-light rounded-pill btn-sm" onclick="location.reload()">
+            <span class="material-symbols-outlined align-middle" style="font-size: 1.2rem">refresh</span>
+        </button>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">Timestamp</th>
+                    <th>User Account</th>
+                    <th>Operation</th>
+                    <th>Module</th>
+                    <th class="pe-4">Activity Details</th>
+                </tr>
+            </thead>
+            <tbody id="audit-log-accordion">
+                @foreach (var log in Model)
+                {
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold small">@log.Timestamp.ToString("dd MMM yyyy")</div>
+                            <div class="text-muted x-small">@log.Timestamp.ToString("hh:mm tt")</div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined text-muted me-2" style="font-size: 1.2rem">person_outline</span>
+                                <span class="small fw-bold">@log.UserId</span>
+                            </div>
+                        </td>
+                        <td>
+                            @{
+                                var statusColor = log.Action.ToLower() switch {
+                                    "create" or "added" => "success",
+                                    "update" or "modified" => "info",
+                                    "delete" or "deleted" => "danger",
+                                    _ => "primary"
+                                };
+                                var icon = log.Action.ToLower() switch {
+                                    "create" or "added" => "add_circle",
+                                    "update" or "modified" => "edit_square",
+                                    "delete" or "deleted" => "delete_forever",
+                                    _ => "info"
+                                };
+                            }
+                            <span class="badge bg-@statusColor bg-opacity-10 text-@statusColor d-inline-flex align-items-center gap-1 px-2 py-1">
+                                <span class="material-symbols-outlined" style="font-size: 1rem">@icon</span>
+                                <span class="text-uppercase ls-1 x-small">@log.Action</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-muted small">@log.EntityName</span>
+                        </td>
+                        <td class="pe-4">
+                            <button class="btn btn-purple-light btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2 audit-toggle-btn" 
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#details-@log.Id" aria-expanded="false">
+                                <span class="material-symbols-outlined icon-collapsed" style="font-size: 1.1rem">list_alt</span>
+                                <span class="material-symbols-outlined icon-expanded" style="font-size: 1.1rem">close</span>
+                                <span class="x-small fw-bold label-collapsed">Activity Details</span>
+                                <span class="x-small fw-bold label-expanded">Close</span>
+                            </button>
+                            
+                            <div class="collapse mt-2" id="details-@log.Id" data-bs-parent="#audit-log-accordion">
+                                <div class="card card-body bg-light border-0 p-0 shadow-none rounded-3 overflow-hidden">
+                                    <div class="p-3 border-bottom bg-white d-flex align-items-center">
+                                        <span class="x-small text-uppercase ls-1 fw-bold text-primary">Property Breakdown</span>
+                                    </div>
+                                    <div class="p-3">
+                                        <div class="row g-2">
+                                            @try
+                                            {
+                                                var detailsObj = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(log.Details);
+                                                if (detailsObj.ValueKind == System.Text.Json.JsonValueKind.Object)
+                                                {
+                                                    foreach (var property in detailsObj.EnumerateObject())
+                                                    {
+                                                        <div class="col-12 d-flex justify-content-between border-bottom border-light pb-1 mb-1">
+                                                            <span class="x-small text-muted text-uppercase fw-bold" style="font-size: 0.65rem">@System.Text.RegularExpressions.Regex.Replace(property.Name, "([a-z])([A-Z])", "$1 $2")</span>
+                                                            <span class="x-small fw-bold text-dark text-break ps-3">@(string.IsNullOrEmpty(property.Value.ToString()) ? "—" : property.Value.ToString())</span>
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="x-small text-muted p-2">@log.Details</div>
+                                                }
+                                            }
+                                            catch
+                                            {
+                                                <div class="x-small text-muted p-2 font-monospace">@log.Details</div>
+                                            }
+                                        </div>
+                                        
+                                        <div class="mt-3 pt-2 border-top text-end">
+                                            <button class="btn btn-light btn-sm rounded-pill px-3 x-small fw-bold border" 
+                                                    type="button" data-bs-toggle="collapse" data-bs-target="#details-@log.Id">
+                                                <span class="material-symbols-outlined align-middle me-1" style="font-size: 1rem">close</span>
+                                                Close Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+
+    /* Dynamic Audit Toggle Button */
+    .audit-toggle-btn[aria-expanded="true"] .label-collapsed,
+    .audit-toggle-btn[aria-expanded="true"] .icon-collapsed,
+    .audit-toggle-btn[aria-expanded="false"] .label-expanded,
+    .audit-toggle-btn[aria-expanded="false"] .icon-expanded {
+        display: none !important;
+    }
+</style>

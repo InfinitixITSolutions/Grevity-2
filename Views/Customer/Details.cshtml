@@ -1,0 +1,111 @@
+@model Grevity.Models.Entities.Customer
+
+@{
+    ViewData["Title"] = "Customer: " + Model.Name;
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Customers</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+            </ol>
+        </nav>
+        <h2 class="h3 mb-0 fw-bold">Client Intelligence</h2>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="d-flex gap-2 justify-content-md-end">
+            <a asp-action="Index" class="btn btn-light rounded-pill px-3">
+                <span class="material-symbols-outlined align-middle me-1">group</span> Directory
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-purple rounded-pill px-4 shadow-sm">
+                <span class="material-symbols-outlined align-middle me-1">edit</span> Update Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="p-5 bg-purple-light text-center">
+                <div class="rounded-circle bg-white shadow-sm d-inline-block p-4 mb-3 border border-3 border-primary">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 4rem">person</span>
+                </div>
+                <h4 class="fw-bold mb-1">@Model.Name</h4>
+                <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill x-small text-uppercase ls-1">Prime Customer</div>
+            </div>
+            <div class="card-body p-4">
+                @if (ViewBag.IsGSTEnabled != false)
+                {
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="material-symbols-outlined text-muted me-3">id_card</span>
+                        <div>
+                            <div class="text-muted x-small text-uppercase ls-1">Tax Identity</div>
+                            <div class="fw-bold fw-monospace small">@(string.IsNullOrEmpty(Model.GSTIN) ? "Non-GST Registered" : Model.GSTIN)</div>
+                        </div>
+                    </div>
+                }
+                <div class="d-flex align-items-center">
+                    <span class="material-symbols-outlined text-muted me-3">location_on</span>
+                    <div>
+                        <div class="text-muted x-small text-uppercase ls-1">Communication Hub</div>
+                        <div class="small">@Model.Address</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <div class="d-flex align-items-center mb-4">
+                <span class="material-symbols-outlined text-primary me-2">contact_page</span>
+                <h5 class="mb-0 fw-bold">Contact Channels</h5>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-light d-flex align-items-center">
+                        <div class="p-2 rounded-3 bg-white shadow-sm me-3 text-success">
+                            <span class="material-symbols-outlined">call</span>
+                        </div>
+                        <div>
+                            <div class="text-muted x-small text-uppercase ls-1">Phone Line</div>
+                            <div class="fw-bold">@Model.Mobile</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-4 bg-light d-flex align-items-center">
+                        <div class="p-2 rounded-3 bg-white shadow-sm me-3 text-info">
+                            <span class="material-symbols-outlined">mail</span>
+                        </div>
+                        <div>
+                            <div class="text-muted x-small text-uppercase ls-1">Email Suite</div>
+                            <div class="fw-bold small">@Model.Email</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <div class="d-flex align-items-center mb-4">
+                <span class="material-symbols-outlined text-primary me-2">history_edu</span>
+                <h5 class="mb-0 fw-bold">Recent Engagements</h5>
+            </div>
+            <div class="p-5 text-center bg-light rounded-4">
+                <span class="material-symbols-outlined display-4 text-muted mb-2">folder_shared</span>
+                <p class="text-muted mb-0">Complete transaction history will appear here once invoices are generated.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+    .bg-purple-light { background-color: var(--md-primary-light); }
+</style>

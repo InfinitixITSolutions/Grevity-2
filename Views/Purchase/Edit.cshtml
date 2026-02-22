@@ -1,0 +1,350 @@
+@model Grevity.Models.ViewModels.InvoiceViewModel
+
+@{
+    ViewData["Title"] = "Adjust Inward Procurement: " + Model.Invoice.InvoiceNumber;
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h2 class="h3 mb-1 fw-bold">Modify Receipt</h2>
+        <p class="text-muted mb-0">Adjusting records for Purchase Bill #@Model.Invoice.InvoiceNumber.</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a asp-action="Details" asp-route-id="@Model.Invoice.Id" class="btn btn-light rounded-pill px-3">
+            <span class="material-symbols-outlined align-middle me-1">visibility</span> Bill Details
+        </a>
+    </div>
+</div>
+
+<form asp-action="Edit" method="post" id="purchaseForm">
+    <input type="hidden" asp-for="Invoice.Id" />
+    <input type="hidden" asp-for="Invoice.InvoiceNumber" />
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+        <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+            <span class="material-symbols-outlined text-primary me-2">edit_note</span>
+            <h5 class="mb-0 fw-bold">Bill Context</h5>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-muted text-uppercase ls-1">Vendor / Supplier *</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><span class="material-symbols-outlined fs-5">factory</span></span>
+                    <select asp-for="Invoice.SupplierId" class="form-select bg-light border-start-0 ps-0 fw-bold" asp-items="@(new SelectList(ViewBag.Suppliers, "Id", "Name"))" required>
+                        <option value="">-- Choose Partner --</option>
+                    </select>
+                </div>
+                <span asp-validation-for="Invoice.SupplierId" class="text-danger small"></span>
+            </div>
+            
+            <div class="col-md-7">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase ls-1">Receipt Date</label>
+                        <input asp-for="Invoice.InvoiceDate" type="date" class="form-control bg-light" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase ls-1">Settlement Due</label>
+                        <input asp-for="Invoice.DueDate" type="date" class="form-control bg-light" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase ls-1">Status Stage</label>
+                        <select asp-for="Invoice.Stage" class="form-select bg-light fw-bold" asp-items="Html.GetEnumSelectList<Grevity.Models.Entities.DocumentStage>()"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-white p-4 border-0 pb-0">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <span class="material-symbols-outlined text-primary me-2">inventory</span>
+                    <h5 class="mb-0 fw-bold">Items Catalogued</h5>
+                </div>
+                <button type="button" class="btn btn-purple-light text-primary rounded-pill btn-sm px-3 fw-bold" onclick="addItem()">
+                    <span class="material-symbols-outlined align-middle me-1">add_circle</span> Append Item
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="itemsTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3 x-small text-uppercase ls-1">Product Description</th>
+                            <th class="py-3 x-small text-uppercase ls-1" style="width: 220px;">Purchase Cost</th>
+                            <th class="py-3 x-small text-uppercase ls-1" style="width: 130px;">Receipt Qty</th>
+                            @if (ViewBag.IsGSTEnabled != false)
+                            {
+                                <th class="py-3 x-small text-uppercase ls-1 text-center" style="width: 120px;">Input Tax%</th>
+                            }
+                            <th class="py-3 x-small text-uppercase ls-1 text-end" style="width: 220px;">Inflow Val</th>
+                            <th class="pe-4" style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <!-- Injection point for dynamic rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Area -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-light border border-dashed">
+                <h6 class="fw-bold small text-uppercase ls-1 mb-3 text-primary">Bill Adjustments</h6>
+                <textarea class="form-control bg-white border-0" rows="4" placeholder="Briefly explain the nature of this revision..."></textarea>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <table class="table table-borderless mb-3">
+                    <tr>
+                        <td class="ps-0 text-muted small">Gross Subtotal</td>
+                        <td class="pe-0 text-end fw-bold h6 mb-0" id="itemTotalDisplay">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-0 text-muted small">Vendor Rebate (-)</td>
+                        <td class="pe-0 text-end" style="width: 140px;">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light">₹</span>
+                                <input asp-for="Invoice.DiscountAmount" class="form-control text-end fw-bold text-danger" id="discountInput" oninput="calculateGrandTotal()" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="border-top">
+                        <td class="ps-0 py-3 h5 fw-bold text-primary">Adjusted Liability</td>
+                        <td class="pe-0 py-3 text-end h5 fw-bold text-primary" id="grandTotalDisplay">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-0 text-muted small">Remitted Payouts</td>
+                        <td class="pe-0 text-end">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light">₹</span>
+                                <input asp-for="Invoice.PaidAmount" class="form-control text-end fw-bold text-success" id="paidInput" type="number" min="0" step="0.01" oninput="updatePaymentStatus()" />
+                            </div>
+                            <span class="text-danger x-small d-block" id="paidAmountError"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-0 text-muted small pt-2">Ledger Balance</td>
+                        <td class="pe-0 text-end pt-2">
+                             <input type="text" class="form-control form-control-sm text-end bg-light border-0 fw-bold" id="remainingAmountDisplay" readonly value="0.00" />
+                        </td>
+                    </tr>
+                </table>
+                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4">
+                    <span class="small fw-bold text-muted text-uppercase ls-1">Settlement Status</span>
+                    <span class="badge @(Model.Invoice.PaymentStatus == "Paid" ? "bg-success" : Model.Invoice.PaymentStatus == "Partial Paid" ? "bg-warning text-dark" : "bg-danger") px-3 py-2 rounded-pill shadow-sm" id="paymentStatusBadge">@Model.Invoice.PaymentStatus.ToUpper()</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-end mb-5 gap-2 d-flex justify-content-end">
+        <a asp-action="Index" class="btn btn-light rounded-pill px-4 fw-bold">Discard Changes</a>
+        <button type="submit" class="btn btn-purple btn-lg rounded-pill px-5 shadow-lg fw-bold">
+            <span class="material-symbols-outlined align-middle me-1">save</span> Modify Procurement
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        let itemIndex = 0;
+        const products = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Products));
+        const subProducts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SubProducts));
+        const existingItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Invoice.InvoiceItems));
+        const isGSTEnabled = @(ViewBag.IsGSTEnabled != false ? "true" : "false");
+
+        function addItem(existingItem = null) {
+            const table = document.getElementById('itemsBody');
+            const row = document.createElement('tr');
+            row.classList.add('item-row');
+            table.appendChild(row);
+            
+            let productOptions = '<option value="">Select Resource</option>';
+            
+            productOptions += '<optgroup label="Products (Finished Goods)">';
+            products.forEach(p => {
+                const selected = existingItem && existingItem.ProductId === p.Id ? 'selected' : '';
+                productOptions += `<option value="${p.Id}" data-type="Product" data-price="${p.PurchasePrice}" data-gst="${p.GSTPercentage}" ${selected}>${p.Name}</option>`;
+            });
+            productOptions += '</optgroup>';
+
+            productOptions += '<optgroup label="Sub-Products (Raw Materials)">';
+            subProducts.forEach(s => {
+                const selected = existingItem && existingItem.SubProductId === s.Id ? 'selected' : '';
+                productOptions += `<option value="${s.Id}" data-type="SubProduct" data-price="${s.PurchasePrice}" data-gst="0" ${selected}>${s.Name} (${s.Unit})</option>`;
+            });
+            productOptions += '</optgroup>';
+
+            const unitPrice = existingItem ? existingItem.UnitPrice : '';
+            const quantity = existingItem ? existingItem.Quantity : 1;
+            const gst = existingItem ? existingItem.GSTPercentage : '';
+
+            row.innerHTML = `
+                <td class="ps-4">
+                    <input type="hidden" name="Invoice.InvoiceItems.Index" value="${itemIndex}" />
+                    <select name="Invoice.InvoiceItems[${itemIndex}].ProductId" class="form-select border-0 bg-transparent fw-bold product-select" onchange="productChanged(this, ${itemIndex})" required>
+                        ${productOptions}
+                    </select>
+                </td>
+                <td>
+                    <div class="premium-entry-group">
+                        <span class="symbol">₹</span>
+                        <input type="number" name="Invoice.InvoiceItems[${itemIndex}].UnitPrice" class="form-control form-control-sm price-input" onchange="calculateRow(${itemIndex})" step="0.01" value="${unitPrice}" required />
+                    </div>
+                </td>
+                <td>
+                    <div class="premium-entry-group">
+                        <input type="number" name="Invoice.InvoiceItems[${itemIndex}].Quantity" class="form-control form-control-sm text-center qty-input" onchange="calculateRow(${itemIndex})" value="${quantity}" min="1" required />
+                    </div>
+                </td>
+                <td class="text-center" style="${isGSTEnabled ? '' : 'display:none;'}">
+                    <div class="premium-entry-group">
+                         <input type="number" name="Invoice.InvoiceItems[${itemIndex}].GSTPercentage" class="form-control form-control-sm text-center gst-input" onchange="calculateRow(${itemIndex})" value="${gst || 0}" step="0.01" />
+                         <span class="symbol">%</span>
+                    </div>
+                </td>
+                <td class="text-end">
+                    <input type="text" class="form-control form-control-sm bg-transparent border-0 text-end fw-bold text-primary total-input" readonly value="0.00" />
+                </td>
+                <td class="pe-4 text-end">
+                    <button type="button" class="btn btn-link link-danger p-0" onclick="removeRow(this)">
+                        <span class="material-symbols-outlined">delete_outline</span>
+                    </button>
+                </td>
+            `;
+            
+            calculateRow(itemIndex);
+            
+            // Trigger name setting for existing items
+            const selectEl = row.querySelector('.product-select');
+            productChanged(selectEl, itemIndex);
+            
+            itemIndex++;
+        }
+
+        function productChanged(select, index) {
+            const option = select.options[select.selectedIndex];
+            if (!option.value) return;
+
+            const type = option.getAttribute('data-type');
+            const price = option.getAttribute('data-price');
+            const gst = option.getAttribute('data-gst');
+            
+            // Dynamically set the name to bind to either ProductId or SubProductId
+            if (type === 'SubProduct') {
+                select.name = `Invoice.InvoiceItems[${index}].SubProductId`;
+            } else {
+                select.name = `Invoice.InvoiceItems[${index}].ProductId`;
+            }
+
+            const row = select.parentNode.parentNode;
+            row.querySelector('.price-input').value = price || 0;
+            row.querySelector('.gst-input').value = gst || 0;
+            
+            calculateRow(index);
+        }
+
+        function calculateRow(index) {
+            const priceInput = document.querySelector(`input[name="Invoice.InvoiceItems[${index}].UnitPrice"]`);
+            const qtyInput = document.querySelector(`input[name="Invoice.InvoiceItems[${index}].Quantity"]`);
+            const gstInput = document.querySelector(`input[name="Invoice.InvoiceItems[${index}].GSTPercentage"]`);
+            
+            if(!priceInput) return;
+            
+            const row = priceInput.closest('.item-row');
+            const totalInput = row.querySelector('.total-input');
+
+            const price = parseFloat(priceInput.value) || 0;
+            const qty = parseFloat(qtyInput.value) || 0;
+            const gst = parseFloat(gstInput.value) || 0;
+
+            const baseTotal = price * qty;
+            const tax = (baseTotal * gst) / 100;
+            const total = baseTotal + tax;
+
+            totalInput.value = total.toFixed(2);
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let total = 0;
+            document.querySelectorAll('.total-input').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+
+            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            const grandTotal = total - discount;
+
+            document.getElementById('itemTotalDisplay').innerText = '₹' + total.toFixed(2);
+            document.getElementById('grandTotalDisplay').innerText = '₹' + grandTotal.toFixed(2);
+            
+            updatePaymentStatus();
+        }
+        
+        function updatePaymentStatus() {
+            const grandTotalText = document.getElementById('grandTotalDisplay').innerText.replace('₹', '');
+            const grandTotal = parseFloat(grandTotalText) || 0;
+            const paidAmount = parseFloat(document.getElementById('paidInput').value) || 0;
+            const errorSpan = document.getElementById('paidAmountError');
+            const statusBadge = document.getElementById('paymentStatusBadge');
+            const remainingDisplay = document.getElementById('remainingAmountDisplay');
+            
+            if (paidAmount < 0) {
+                errorSpan.textContent = 'Invalid amount';
+                document.getElementById('paidInput').setCustomValidity('Cannot be negative');
+            } else if (paidAmount > grandTotal && grandTotal > 0) {
+                errorSpan.textContent = '+Exceeds Goal';
+                document.getElementById('paidInput').setCustomValidity('Cannot exceed total');
+            } else {
+                errorSpan.textContent = '';
+                document.getElementById('paidInput').setCustomValidity('');
+            }
+            
+            const remaining = grandTotal - paidAmount;
+            remainingDisplay.value = remaining.toFixed(2);
+            
+            if (paidAmount == 0) {
+                statusBadge.textContent = 'UNSETTLED';
+                statusBadge.className = 'badge bg-danger px-3 py-2 rounded-pill shadow-sm';
+            } else if (paidAmount >= grandTotal && grandTotal > 0) {
+                statusBadge.textContent = 'SETTLED';
+                statusBadge.className = 'badge bg-success px-3 py-2 rounded-pill shadow-sm';
+            } else {
+                statusBadge.textContent = 'REMITTED';
+                statusBadge.className = 'badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm';
+            }
+        }
+
+        function removeRow(btn) {
+            const row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            calculateGrandTotal();
+        }
+
+        window.onload = function() {
+            if (existingItems && existingItems.length > 0) {
+                existingItems.forEach(item => addItem(item));
+            } else {
+                addItem();
+            }
+            calculateGrandTotal();
+        };
+    </script>
+}
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+    .btn-purple-light { background-color: var(--md-primary-light); }
+    .form-select, .form-control { border-radius: 0.75rem; }
+</style>

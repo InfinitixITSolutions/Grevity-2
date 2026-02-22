@@ -1,0 +1,210 @@
+@{
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<div class="sidebar-wrapper d-flex flex-column h-100">
+    <div class="sidebar-mobile-header px-4 py-3">
+        <h5 class="mb-0 fw-bold">Menu</h5>
+        <button type="button" class="btn-close" onclick="toggleSidebar()"></button>
+    </div>
+    <ul class="nav flex-column mb-auto">
+        <!-- Dashboard -->
+        <li class="nav-item">
+            <a asp-controller="Home" asp-action="Index" class="nav-link @(controller == "Home" && action == "Index" ? "active" : "")">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+        </li>
+
+        <!-- Masters -->
+        <li class="nav-header">Master Data</li>
+        <li class="nav-item">
+            <a href="#mastersMenu" data-bs-toggle="collapse" hx-boost="false" class="nav-link @(controller == "Customer" || controller == "Product" || controller == "Supplier" || controller == "SubProduct" ? "active" : "") d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="material-symbols-outlined">database</span>
+                    <span>Masters</span>
+                </div>
+                <span class="material-symbols-outlined chevron" style="font-size: 1rem">expand_more</span>
+            </a>
+            <ul class="collapse list-unstyled ps-4 @(controller == "Customer" || controller == "Product" || controller == "Supplier" || controller == "SubProduct" ? "show" : "")" id="mastersMenu">
+                <li>
+                    <a asp-controller="Customer" asp-action="Index" class="nav-link @(controller == "Customer" ? "active" : "")">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">group</span> <span>Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Supplier" asp-action="Index" class="nav-link @(controller == "Supplier" ? "active" : "")">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">local_shipping</span> <span>Suppliers</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Product" asp-action="Index" class="nav-link @(controller == "Product" ? "active" : "")">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">inventory_2</span> <span>Products</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SubProduct" asp-action="Index" class="nav-link @(controller == "SubProduct" ? "active" : "")">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">inventory</span> <span>Sub Products</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Billing -->
+        <li class="nav-header">Transactions</li>
+        <li class="nav-item">
+            <a href="#billingMenu" data-bs-toggle="collapse" hx-boost="false" class="nav-link @(controller == "Invoice" || controller == "Purchase" ? "active" : "") d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    <span>Billing</span>
+                </div>
+                <span class="material-symbols-outlined chevron" style="font-size: 1rem">expand_more</span>
+            </a>
+            <ul class="collapse list-unstyled ps-4 @(controller == "Invoice" || controller == "Purchase" || controller == "Transaction" ? "show" : "")" id="billingMenu">
+                <li>
+                    <a asp-controller="Invoice" asp-action="Index" class="nav-link @(controller == "Invoice" ? "active" : "")">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">description</span> <span>Sales Invoices</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Purchase" asp-action="Index" class="nav-link @(controller == "Purchase" ? "active" : "")">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">shopping_cart_checkout</span> <span>Purchase Bills</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Reports -->
+        <li class="nav-header">Analysis</li>
+        <li class="nav-item">
+            <a href="#reportsMenu" data-bs-toggle="collapse" hx-boost="false" class="nav-link @(controller == "Reports" ? "active" : "") d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span>Reports</span>
+                </div>
+                <span class="material-symbols-outlined chevron" style="font-size: 1rem">expand_more</span>
+            </a>
+            <ul class="collapse list-unstyled ps-4 @(controller == "Reports" ? "show" : "")" id="reportsMenu">
+                <li>
+                    <a asp-controller="Reports" asp-action="SalesReport" class="nav-link">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">trending_up</span> <span>Sales Report</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Reports" asp-action="PurchaseReport" class="nav-link">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">trending_down</span> <span>Purchase Report</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Reports" asp-action="UnpaidSales" class="nav-link">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">event_busy</span> <span>Unpaid Sales</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Reports" asp-action="UnpaidPurchase" class="nav-link">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">error</span> <span>Unpaid Purchase</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Reports" asp-action="PaidPurchase" class="nav-link">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">check_circle</span> <span>Paid Purchase</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Reports" asp-action="CustomerOutstanding" class="nav-link">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">person_search</span> <span>Customer Outstanding</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Reports" asp-action="ConsolidatedReport" class="nav-link fw-bold" style="color: var(--md-info)">
+                        <span class="material-symbols-outlined" style="font-size: 1.2rem">summarize</span> <span>Consolidated</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Settings -->
+        <li class="nav-header">System</li>
+        <li class="nav-item">
+             <a asp-controller="Settings" asp-action="List" class="nav-link @(controller == "Settings" && action == "List" ? "active" : "")">
+                <span class="material-symbols-outlined">domain</span>
+                <span>Manage Companies</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a asp-controller="AuditLogs" asp-action="Index" class="nav-link @(controller == "AuditLogs" ? "active" : "")">
+                <span class="material-symbols-outlined">history</span>
+                <span>Audit Logs</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a asp-controller="Settings" asp-action="Index" class="nav-link @(controller == "Settings" && action == "Index" ? "active" : "")">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Settings</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="mt-auto dropdown dropup sidebar-footer-dropdown">
+        <div class="p-4 d-flex align-items-center sidebar-footer" style="background: var(--md-background); border-top: 1px solid var(--border-color)" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background: var(--md-primary-light); color: var(--md-primary)">
+                <span class="material-symbols-outlined">shield_person</span>
+            </div>
+            <div class="sidebar-footer-text overflow-hidden">
+                <div class="text-dark fw-bold small text-truncate">Grevity Admin</div>
+                <div class="text-muted x-small text-truncate">Premium Edition</div>
+            </div>
+        </div>
+        <ul class="dropdown-menu shadow border-0 rounded-4">
+            <li class="px-3 py-2 border-bottom mb-1">
+                <span class="text-muted small fw-bold text-uppercase ls-1">Admin Actions</span>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#">
+                    <span class="material-symbols-outlined me-2" style="font-size: 1.1rem">person</span>
+                    My Profile
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                    <span class="material-symbols-outlined me-2" style="font-size: 1.1rem">logout</span>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .x-small { font-size: 0.75rem; }
+    .sidebar.collapsed .sidebar-footer {
+        padding: 1rem 0 !important;
+        justify-content: center;
+    }
+    .sidebar.collapsed .sidebar-footer-text {
+        display: none;
+    }
+    .sidebar.collapsed .sidebar-footer div.me-3 {
+        margin-right: 0 !important;
+    }
+    
+    .chevron {
+        transition: transform 0.3s ease;
+        opacity: 0.5;
+    }
+    
+    [aria-expanded="true"] .chevron {
+        transform: rotate(180deg);
+    }
+    
+    .nav-header {
+        padding: 1.5rem 1.5rem 0.5rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--md-text-muted);
+        letter-spacing: 0.1em;
+        font-weight: 700;
+    }
+</style>

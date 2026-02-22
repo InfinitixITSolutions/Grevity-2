@@ -1,0 +1,76 @@
+@model IEnumerable<Grevity.Models.Entities.Supplier>
+
+@{
+    ViewData["Title"] = "Suppliers";
+}
+
+<div class="card border-0 mb-4">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3 gap-3">
+        <div class="d-flex align-items-center flex-grow-1" style="max-width: 500px;">
+            <form asp-action="Index" method="get" class="w-100 position-relative">
+                <span class="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="font-size: 1.2rem">search</span>
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control ps-5 rounded-pill shadow-none" placeholder="Search by name, mobile or email..." onchange="this.form.submit()">
+                @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+                {
+                    <a asp-action="Index" class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted text-decoration-none">
+                        <span class="material-symbols-outlined" style="font-size: 1.25rem">close</span>
+                    </a>
+                }
+            </form>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <h4 class="mb-0 d-none d-lg-block me-3 text-muted opacity-50 fw-normal">|</h4>
+            <a asp-action="Create" class="btn btn-primary d-flex align-items-center rounded-pill px-4">
+                <span class="material-symbols-outlined me-2">add</span> Add New Supplier
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Supplier Name</th>
+                        <th>Contact Info</th>
+                        <th>Tax Details</th>
+                        <th class="text-center pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-circle bg-purple-light text-primary me-3">
+                                        <span class="material-symbols-outlined" style="font-size: 1.25rem">local_shipping</span>
+                                    </div>
+                                    <div class="fw-bold fs-6">@item.Name</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small fw-bold">@item.Mobile</div>
+                                <div class="text-muted small">@item.Email</div>
+                            </td>
+                            <td><span class="badge bg-light text-primary border border-primary border-opacity-25">@item.GSTIN</span></td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-info" title="View Details">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">visibility</span>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-warning" title="Edit">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">edit</span>
+                                    </a>
+                                    <button type="button" class="btn btn-light btn-sm d-flex align-items-center text-danger" title="Delete"
+                                            onclick="confirmDelete('@Url.Action("Delete", new { id = item.Id })', 'Do you want to delete supplier @item.Name?')">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

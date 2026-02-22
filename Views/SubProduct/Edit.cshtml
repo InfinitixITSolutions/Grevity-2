@@ -1,0 +1,74 @@
+@model Grevity.Models.Entities.SubProduct
+
+@{
+    ViewData["Title"] = "Edit Sub Product";
+}
+
+<div class="card border-0 mb-4">
+    <div class="card-header py-3">
+        <h4 class="mb-0">Edit Sub Product</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Unit" class="form-label"></label>
+                    <select asp-for="Unit" class="form-select">
+                        <option value="Pcs">Pieces (Pcs)</option>
+                        <option value="Kg">Kilograms (Kg)</option>
+                        <option value="Liter">Liters</option>
+                        <option value="Meter">Meters</option>
+                        <option value="Box">Box</option>
+                        <option value="Dozen">Dozen</option>
+                    </select>
+                    <span asp-validation-for="Unit" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Current Stock (Read Only)</label>
+                    <input value="@Model.CurrentStock @Model.Unit" class="form-control" readonly />
+                    <small class="text-muted">Stock changes through purchases/sales only</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="PurchasePrice" class="form-label"></label>
+                    <input asp-for="PurchasePrice" class="form-control" type="number" step="0.01" />
+                    <span asp-validation-for="PurchasePrice" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="LowStockAlertLimit" class="form-label"></label>
+                    <input asp-for="LowStockAlertLimit" class="form-control" type="number" step="0.01" />
+                    <span asp-validation-for="LowStockAlertLimit" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-symbols-outlined me-2" style="font-size: 1.2rem; vertical-align: middle">save</span>
+                    Save Changes
+                </button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

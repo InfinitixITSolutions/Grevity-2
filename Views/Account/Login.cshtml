@@ -1,0 +1,43 @@
+@model Grevity.Models.ViewModels.LoginViewModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Login";
+}
+
+<div class="text-center mb-4">
+    <span class="material-symbols-outlined text-primary mb-2" style="font-size: 3rem">account_balance_wallet</span>
+    <h3 class="fw-bold">Grevity Login</h3>
+    <p class="text-muted small">Welcome back! Please enter your details.</p>
+</div>
+
+<form asp-action="Login" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    
+    <div class="mb-3">
+        <label asp-for="Username" class="form-label fw-semibold">Username</label>
+        <input asp-for="Username" class="form-control" placeholder="Enter username" />
+        <span asp-validation-for="Username" class="text-danger small"></span>
+    </div>
+    
+    <div class="mb-3">
+        <div class="d-flex justify-content-between">
+            <label asp-for="Password" class="form-label fw-semibold">Password</label>
+            @* <a asp-action="ForgotPassword" class="text-primary text-decoration-none small">Forgot password?</a> *@
+        </div>
+        <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+        <span asp-validation-for="Password" class="text-danger small"></span>
+    </div>
+
+    <div class="d-grid mb-4">
+        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Login</button>
+    </div>
+
+    <div class="text-center">
+        <p class="text-muted small mb-0">Don't have an account? <a asp-action="Register" class="text-primary fw-bold text-decoration-none">Sign Up</a></p>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

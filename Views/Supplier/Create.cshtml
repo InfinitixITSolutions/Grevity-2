@@ -1,0 +1,105 @@
+@model Grevity.Models.Entities.Supplier
+
+@{
+    ViewData["Title"] = "Onboard Supply Source";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-9">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2 class="h3 mb-1 fw-bold">Vendor Onboarding</h2>
+                <p class="text-muted mb-0">Register a new inward procurement source for supply chain continuity.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a asp-action="Index" class="btn btn-light rounded-pill px-3">
+                    <span class="material-symbols-outlined align-middle me-1">factory</span> Supply Chain
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white p-4 border-0 pb-0">
+                <div class="d-flex align-items-center mb-1">
+                    <span class="material-symbols-outlined text-primary me-2">person_add</span>
+                    <h5 class="mb-0 fw-bold text-dark">Supplier Profile</h5>
+                </div>
+                <p class="text-muted small mb-0">Establish statutory and contact credentials for inward supply records.</p>
+            </div>
+            <div class="card-body p-4 pt-4">
+                <form asp-action="Create" method="post">
+                    <div class="row g-4 mb-4">
+                        <!-- Primary Info -->
+                        <div class="col-md-7">
+                            <label asp-for="Name" class="form-label small fw-bold text-muted text-uppercase ls-1">Vendor Entity Name *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">corporate_fare</span></span>
+                                <input asp-for="Name" class="form-control bg-light border-0 fw-bold" placeholder="Registered Firm Name" required />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger x-small"></span>
+                        </div>
+                        
+                        @if (ViewBag.IsGSTEnabled != false)
+                        {
+                            <div class="col-md-5">
+                                <label asp-for="GSTIN" class="form-label small fw-bold text-muted text-uppercase ls-1">Tax ID (GSTIN)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">assignment_ind</span></span>
+                                    <input asp-for="GSTIN" class="form-control bg-light border-0 fw-bold" placeholder="Vendor's Tax Identifier" />
+                                </div>
+                                <span asp-validation-for="GSTIN" class="text-danger x-small"></span>
+                            </div>
+                        }
+
+                        <!-- Communication -->
+                        <div class="col-md-6">
+                            <label asp-for="Mobile" class="form-label small fw-bold text-muted text-uppercase ls-1">Point of Contact *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">phone_in_talk</span></span>
+                                <input asp-for="Mobile" class="form-control bg-light border-0 fw-bold" placeholder="Direct mobile line" required />
+                            </div>
+                            <span asp-validation-for="Mobile" class="text-danger x-small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label small fw-bold text-muted text-uppercase ls-1">Sales Correspondence Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">alternate_email</span></span>
+                                <input asp-for="Email" class="form-control bg-light border-0 fw-bold" placeholder="sales@vendor.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger x-small"></span>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="col-md-12">
+                            <label asp-for="Address" class="form-label small fw-bold text-muted text-uppercase ls-1">Registered Dispatch / Office Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 align-items-start pt-2"><span class="material-symbols-outlined fs-5">location_city</span></span>
+                                <textarea asp-for="Address" class="form-control bg-light border-0 fw-bold" rows="3" placeholder="Primary place of business..."></textarea>
+                            </div>
+                            <span asp-validation-for="Address" class="text-danger x-small"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center justify-content-between border-top pt-4">
+                        <button type="submit" class="btn btn-purple btn-lg rounded-pill px-5 shadow-lg fw-bold">
+                            <span class="material-symbols-outlined align-middle me-1">person_add</span> Enlist Supplier
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+    .form-control { border-radius: 0.85rem; padding: 0.75rem 1rem; }
+    .input-group-text { border-radius: 0.85rem 0 0 0.85rem; }
+    .input-group .form-control { border-radius: 0 0.85rem 0.85rem 0; }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,91 @@
+@model IEnumerable<Grevity.Models.Entities.Invoice>
+
+@{
+    ViewData["Title"] = "Sales Invoices";
+}
+
+<div class="card border-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+        <h4 class="mb-0">Sales Invoices</h4>
+        <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+            <span class="material-symbols-outlined me-2">post_add</span> Create New Invoice
+        </a>
+    </div>
+    <div class="card-body pt-0">
+        <div class="row pt-4 mb-4 align-items-center">
+            <div class="col-md-6">
+                <form method="get" class="d-flex position-relative">
+                    <span class="material-symbols-outlined position-absolute translate-middle-y top-50 ms-3 text-muted">search</span>
+                    <input type="text" name="searchTerm" class="form-control ps-5 border-0 bg-light rounded-pill" placeholder="Search by invoice # or customer..." value="@Context.Request.Query["searchTerm"]">
+                </form>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="btn-group rounded-pill overflow-hidden border">
+                    <button type="button" class="btn btn-light btn-sm text-primary fw-bold px-3">All</button>
+                    <button type="button" class="btn btn-light btn-sm text-muted px-3">Unpaid</button>
+                    <button type="button" class="btn btn-light btn-sm text-muted px-3">Paid</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Invoice Details</th>
+                        <th>Customer</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-center">Workflow</th>
+                        <th class="text-center">Payment</th>
+                        <th class="text-center pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-3 bg-purple-light text-primary me-3">
+                                        <span class="material-symbols-outlined" style="font-size: 1.25rem">receipt_long</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold fs-6">@item.InvoiceNumber</div>
+                                        <div class="text-muted x-small">@item.InvoiceDate.ToString("dd MMM yyyy")</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-bold small">@item.Customer?.Name</div>
+                                <div class="text-muted x-small">Client</div>
+                            </td>
+                            <td class="text-end fw-bold">@item.GrandTotal.ToString("C")</td>
+                            <td class="text-center">
+                                <span class="badge bg-purple-light text-primary border border-primary border-opacity-10">@item.Stage</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge @(item.Status == "Paid" ? "bg-success" : "bg-warning") bg-opacity-10 text-@(item.Status == "Paid" ? "success" : "warning")">
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-info" title="View / Print">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">print</span>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-warning" title="Edit">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">edit_note</span>
+                                    </a>
+                                    <button type="button" class="btn btn-light btn-sm d-flex align-items-center text-danger" title="Delete"
+                                            onclick="confirmDelete('@Url.Action("Delete", new { id = item.Id })', 'Delete invoice #@item.InvoiceNumber?')">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

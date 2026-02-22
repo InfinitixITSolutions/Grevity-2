@@ -1,0 +1,233 @@
+@model Grevity.Models.Entities.Product
+
+@{
+    ViewData["Title"] = Model == null || Model.Id == 0 ? "Onboard Asset" : "Modify Provision";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-9">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2 class="h3 mb-1 fw-bold">@(Model == null || Model.Id == 0 ? "Inventory Onboarding" : "Asset Revision")</h2>
+                <p class="text-muted mb-0">Define stock parameters and commercial attributes for global availability.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a asp-action="Index" class="btn btn-light rounded-pill px-3">
+                    <span class="material-symbols-outlined align-middle me-1">inventory_2</span> Open Catalog
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white p-4 border-0 pb-0">
+                <div class="d-flex align-items-center mb-1">
+                    <span class="material-symbols-outlined text-primary me-2">box_edit</span>
+                    <h5 class="mb-0 fw-bold text-dark">Resource Definition</h5>
+                </div>
+                <p class="text-muted small mb-0">Fields marked with (*) are required for ledger consistency.</p>
+            </div>
+            <div class="card-body p-4 pt-4">
+                <form asp-action="@(Model == null || Model.Id == 0 ? "Create" : "Edit")" method="post">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-12">
+                            <label asp-for="Name" class="form-label small fw-bold text-muted text-uppercase ls-1">Common Display Name *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">category</span></span>
+                                <input asp-for="Name" class="form-control bg-light border-0 fw-bold" placeholder="e.g. Premium Hydraulic Fluid (Grade A)" required />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger x-small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ItemType" class="form-label small fw-bold text-muted text-uppercase ls-1">Commercial Flow *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">sync_alt</span></span>
+                                <select asp-for="ItemType" class="form-select bg-light border-0 fw-bold">
+                                    <option value="Sales">Revenue Generating (Sales)</option>
+                                    <option value="Purchase">Inward Procurement (Purchase)</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="ItemType" class="text-danger x-small"></span>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label asp-for="HSN" class="form-label small fw-bold text-muted text-uppercase ls-1">HSN / SAC Classifier</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">tag</span></span>
+                                <input asp-for="HSN" class="form-control bg-light border-0 fw-bold" placeholder="Standard Tariff Code" />
+                            </div>
+                            <span asp-validation-for="HSN" class="text-danger x-small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Unit" class="form-label small fw-bold text-muted text-uppercase ls-1">Stock Unit *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">straighten</span></span>
+                                <select asp-for="Unit" class="form-select bg-light border-0 fw-bold">
+                                    <option value="Nos">Numbers (Nos)</option>
+                                    <option value="Pcs">Pieces (Pcs)</option>
+                                    <option value="Kg">Kilogram (Kg)</option>
+                                    <option value="Ltr">Litre (Ltr)</option>
+                                    <option value="Mtr">Metre (Mtr)</option>
+                                    <option value="Box">Box / Carton</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="Unit" class="text-danger x-small"></span>
+                        </div>
+                        
+                        @if (ViewBag.IsGSTEnabled != false)
+                        {
+                            <div class="col-md-4">
+                                <label asp-for="GSTPercentage" class="form-label small fw-bold text-muted text-uppercase ls-1">Statutory Tax (%)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">percent</span></span>
+                                    <input asp-for="GSTPercentage" class="form-control bg-light border-0 fw-bold" type="number" step="0.01" />
+                                </div>
+                                <span asp-validation-for="GSTPercentage" class="text-danger x-small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <!-- spacer -->
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="GSTPercentage" value="0" />
+                            <div class="col-md-8">
+                                <!-- spacer for full width when GST is hidden -->
+                            </div>
+                        }
+
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light p-3 rounded-4 h-100">
+                                <label asp-for="Price" class="form-label small fw-bold text-muted text-uppercase ls-1 mb-2">Standard Selling Rate</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-0"><span class="material-symbols-outlined fs-5 text-success">payments</span></span>
+                                    <input asp-for="Price" class="form-control border-0 fw-bold ps-1 h5 mb-0" type="number" step="0.01" />
+                                </div>
+                                <p class="text-muted x-small mt-2 mb-0">Default price shown in sales invoices and orders.</p>
+                                <span asp-validation-for="Price" class="text-danger x-small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light p-3 rounded-4 h-100 border-start border-4 border-warning">
+                                <label asp-for="PurchasePrice" class="form-label small fw-bold text-muted text-uppercase ls-1 mb-2">Last Inward Cost</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-0"><span class="material-symbols-outlined fs-5 text-warning">shopping_cart</span></span>
+                                    <input asp-for="PurchasePrice" class="form-control border-0 fw-bold ps-1 h5 mb-0" type="number" step="0.01" />
+                                </div>
+                                <p class="text-muted x-small mt-2 mb-0">Base cost price utilized for margin analysis.</p>
+                                <span asp-validation-for="PurchasePrice" class="text-danger x-small"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="Description" class="form-label small fw-bold text-muted text-uppercase ls-1">Internal Provisions & Specs</label>
+                            <textarea asp-for="Description" class="form-control bg-light border-0 rounded-4" rows="3" placeholder="Log technical specifications or handling instructions..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger x-small"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 bg-light rounded-4 mb-4">
+                        <div class="card-header bg-transparent border-0 pt-4 px-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <span class="material-symbols-outlined text-primary me-2">account_tree</span>
+                                    <h6 class="mb-0 fw-bold text-dark text-uppercase ls-1">Product Composition (Raw Materials)</h6>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" onclick="addRow()">
+                                    <span class="material-symbols-outlined fs-6 align-middle">add</span> Add Material
+                                </button>
+                            </div>
+                            <p class="text-muted small mt-1 mb-0">Define sub-products required to manufacture this item.</p>
+                        </div>
+                        <div class="card-body p-4 pt-2">
+                            <div class="table-responsive">
+                                <table class="table table-borderless align-middle mb-0" id="compositionTable">
+                                    <thead>
+                                        <tr class="small text-muted text-uppercase fw-bold">
+                                            <th style="width: 60%">Sub Product</th>
+                                            <th style="width: 30%">Quantity Required</th>
+                                            <th style="width: 10%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="compositionBody">
+                                        <!-- Rows will be added here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="noMaterialsMessage" class="text-center py-3 text-muted">
+                                <span class="material-symbols-outlined d-block mb-1 opacity-50">inventory_2</span>
+                                <small>No composition defined. This is a standalone product.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between border-top pt-4">
+                        <button type="submit" class="btn btn-purple btn-lg rounded-pill px-5 shadow-lg fw-bold">
+                            <span class="material-symbols-outlined align-middle me-1">inventory</span> Commit Entry
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+    .form-select, .form-control { border-radius: 0.85rem; padding: 0.75rem 1rem; }
+    .input-group-text { border-radius: 0.85rem 0 0 0.85rem; }
+    .input-group .form-control, .input-group .form-select { border-radius: 0 0.85rem 0.85rem 0; }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const subProducts = @Html.Raw(Json.Serialize(ViewBag.SubProducts));
+        
+        function addRow() {
+            document.getElementById('noMaterialsMessage').classList.add('d-none');
+            const tbody = document.getElementById('compositionBody');
+            const tr = document.createElement('tr');
+            
+            let options = '<option value="">Select Sub Product...</option>';
+            subProducts.forEach(sp => {
+                options += `<option value="${sp.id}" data-unit="${sp.unit}">${sp.name} (${sp.unit})</option>`;
+            });
+
+            tr.innerHTML = `
+                <td>
+                    <select name="subProductIds" class="form-select bg-white border fw-bold sp-select" required onchange="updateUnit(this)">
+                        ${options}
+                    </select>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <input type="number" name="quantities" class="form-control bg-white border fw-bold" step="0.01" min="0.01" required placeholder="0.00" />
+                        <span class="input-group-text bg-light border ps-2 pe-2 unit-label">-</span>
+                    </div>
+                </td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-link text-danger p-0" onclick="removeRow(this)">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function removeRow(btn) {
+            btn.closest('tr').remove();
+            if (document.getElementById('compositionBody').children.length === 0) {
+                document.getElementById('noMaterialsMessage').classList.remove('d-none');
+            }
+        }
+
+        function updateUnit(select) {
+            const unit = select.options[select.selectedIndex].getAttribute('data-unit') || '-';
+            select.closest('tr').querySelector('.unit-label').textContent = unit;
+        }
+    </script>
+}

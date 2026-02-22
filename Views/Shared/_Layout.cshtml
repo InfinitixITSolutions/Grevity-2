@@ -1,0 +1,223 @@
+﻿@using Grevity.Services.Interfaces
+@inject ICompanyContext CompanyContext
+@inject IBusinessSettingService BusinessSettingService
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Grevity</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Grevity.styles.css" asp-append-version="true" />
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-light" hx-boost="true">
+    <header class="navbar-top no-print">
+        <div class="d-flex align-items-center w-100">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="sidebar-toggle me-3" onclick="toggleSidebar()">
+                    <span class="material-symbols-outlined">menu</span>
+                </div>
+            }
+            @if (User.Identity.IsAuthenticated)
+            {
+                var activeCompanyId = CompanyContext.CurrentCompanyId;
+                var activeCompany = activeCompanyId.HasValue ? await BusinessSettingService.GetSettingsAsync(activeCompanyId.Value) : null;
+
+                <a class="navbar-brand d-flex align-items-center fw-bold text-decoration-none" asp-controller="Home" asp-action="Index" style="color: var(--md-primary)">
+                    @if (activeCompany != null && !string.IsNullOrEmpty(activeCompany.LogoPath))
+                    {
+                        <img src="@activeCompany.LogoPath" alt="@activeCompany.CompanyName" style="height: 35px; width: auto; object-fit: contain;" class="me-2" />
+                    }
+                    else
+                    {
+                        <span class="material-symbols-outlined me-2" style="font-size: 2rem">account_balance_wallet</span>
+                    }
+                    <span class="fs-4">@(activeCompany?.CompanyName ?? "Grevity")</span>
+                </a>
+            }
+            else
+            {
+                <a class="navbar-brand d-flex align-items-center fw-bold text-decoration-none" asp-controller="Home" asp-action="Index" style="color: var(--md-primary)">
+                    <span class="material-symbols-outlined me-2" style="font-size: 2rem">account_balance_wallet</span>
+                    <span class="fs-4">Grevity</span>
+                </a>
+            }
+            
+            <div class="ms-auto d-flex align-items-center">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="me-3 d-none d-md-block">
+                        <partial name="_CompanySwitcher" />
+                    </div>
+                }
+                <div class="dropdown user-profile-dropdown">
+                    <a href="javascript:void(0)" class="d-flex align-items-center text-decoration-none dropdown-toggle user-pill" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="material-symbols-outlined me-2 text-primary" style="font-size: 1.25rem">account_circle</span>
+                        <span class="fw-bold d-none d-sm-inline">Hello, @(User.Identity?.Name ?? "User")!</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4" aria-labelledby="userMenu">
+                        <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                                <span class="material-symbols-outlined me-2" style="font-size: 1.25rem">dashboard</span> Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center" asp-controller="Settings" asp-action="Index">
+                                <span class="material-symbols-outlined me-2" style="font-size: 1.25rem">settings</span> Settings
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li>
+                                <form class="form-inline" asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                    <button type="submit" class="dropdown-item py-2 text-danger border-0 bg-transparent w-100 text-start d-flex align-items-center">
+                                        <span class="material-symbols-outlined me-2" style="font-size: 1.25rem">logout</span> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid p-0">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+            <div id="sidebar" class="sidebar">
+                <partial name="_Sidebar" />
+            </div>
+            <main role="main" class="main-content">
+                <partial name="_Breadcrumbs" />
+                <div class="mt-3">
+                    <partial name="_Notifications" />
+                    @RenderBody()
+                </div>
+                <footer class="mt-5 py-3 text-muted text-center border-top no-print">
+                    &copy; 2026 - Grevity - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+                </footer>
+            </main>
+        }
+        else
+        {
+            <main role="main" class="w-100 px-4 mt-5 pt-5">
+                @RenderBody()
+            </main>
+        }
+    </div>
+
+    <!-- Global Modal for Delete Confirmation -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel"><i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="mb-0 fs-5 text-center" id="deleteModalMessage">Are you sure you want to permanently delete this item?</p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                    <a id="confirmDeleteButton" href="#" class="btn btn-danger px-4">Delete Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        // NProgress Configuration
+        NProgress.configure({ showSpinner: false });
+        
+        document.addEventListener('htmx:beforeRequest', () => NProgress.start());
+        document.addEventListener('htmx:afterRequest', () => NProgress.done());
+        document.addEventListener('htmx:onLoadError', () => NProgress.done());
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar) return;
+
+            if (window.innerWidth < 992) {
+                // Mobile behavior: toggle "show"
+                sidebar.classList.toggle('show');
+                if (overlay) overlay.classList.toggle('show');
+            } else {
+                // Desktop behavior: toggle "collapsed"
+                sidebar.classList.toggle('collapsed');
+                
+                // Save state to localStorage only for desktop
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebar-collapsed', isCollapsed);
+            }
+        }
+
+        // Restore sidebar state on load
+        function restoreSidebarState() {
+            if (window.innerWidth >= 992) {
+                const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                }
+            }
+        }
+        
+        restoreSidebarState();
+
+        // Global Delete Confirmation Function
+        function confirmDelete(url, message = 'Are you sure you want to delete this record?') {
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            document.getElementById('deleteModalMessage').textContent = message;
+            document.getElementById('confirmDeleteButton').setAttribute('href', url);
+            modal.show();
+            return false;
+        }
+
+        // Initialize dropdowns helper function
+        // Initialize dropdowns helper function
+        function initializeDropdowns() {
+            // Modern Bootstrap 5 uses event delegation on the document level.
+            // Manual initialization can sometimes conflict with this, especially with HTMX.
+            // We'll leave this empty to let Bootstrap handle it natively.
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDropdowns();
+        });
+
+        // Re-initialize after HTMX swaps (when new content is added)
+        document.addEventListener('htmx:afterSwap', function(evt) {
+            initializeDropdowns();
+        });
+
+        // Re-initialize after HTMX settles (after animations complete)
+        document.addEventListener('htmx:afterSettle', function(evt) {
+            initializeDropdowns();
+        });
+
+        // Also re-initialize after HTMX loads (for full content replacement)
+        document.addEventListener('htmx:afterOnLoad', function(evt) {
+            initializeDropdowns();
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

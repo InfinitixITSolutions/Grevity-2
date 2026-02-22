@@ -1,0 +1,47 @@
+@using Grevity.Services.Interfaces
+@inject ICompanyContext CompanyContext
+@inject Grevity.Repositories.Interfaces.IRepository<Grevity.Models.Entities.UserCompany> UserCompanyRepo
+@inject Grevity.Repositories.Interfaces.IRepository<Grevity.Models.Entities.BusinessSetting> BusinessSettingRepo
+
+@{
+    var userIdStr = User.FindFirst("UserId")?.Value;
+    int.TryParse(userIdStr, out int userId);
+    var currentCompanyId = CompanyContext.CurrentCompanyId;
+    
+    var companyIds = (await UserCompanyRepo.GetAllAsync())
+        .Where(uc => uc.UserId == userId)
+        .Select(uc => uc.BusinessSettingId)
+        .ToList();
+
+    var myCompanies = (await BusinessSettingRepo.GetAllAsync())
+        .Where(c => companyIds.Contains(c.Id))
+        .ToList();
+
+    var currentCompany = myCompanies.FirstOrDefault(c => c.Id == currentCompanyId);
+}
+
+@if (myCompanies.Any())
+{
+    <form asp-controller="Account" asp-action="SwitchCompany" method="post" class="d-flex align-items-center" hx-boost="false">
+        <div class="dropdown company-switcher-dropdown">
+            <a href="javascript:void(0)" class="d-flex align-items-center text-decoration-none dropdown-toggle company-pill" id="companySwitcher" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="material-symbols-outlined me-2 text-primary" style="font-size: 1.25rem">apartment</span>
+                <span class="fw-bold">@(currentCompany?.CompanyName ?? "Select Company")</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4" aria-labelledby="companySwitcher">
+                <li class="px-3 py-2 border-bottom mb-1">
+                    <span class="text-muted small fw-bold text-uppercase ls-1">Switch Company</span>
+                </li>
+                @foreach (var company in myCompanies)
+                {
+                    <li>
+                        <button type="submit" name="companyId" value="@company.Id" class="dropdown-item d-flex align-items-center @(company.Id == currentCompanyId ? "active" : "")">
+                            <span class="material-symbols-outlined me-2" style="font-size: 1.1rem">@(company.Id == currentCompanyId ? "check_circle" : "business")</span>
+                            @company.CompanyName
+                        </button>
+                    </li>
+                }
+            </ul>
+        </div>
+    </form>
+}

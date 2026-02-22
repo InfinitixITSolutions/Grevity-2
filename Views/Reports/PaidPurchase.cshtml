@@ -1,0 +1,89 @@
+@model IEnumerable<Grevity.Models.Entities.Invoice>
+
+@{
+    ViewData["Title"] = "Settled: Paid Purchase History";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h2 class="h3 mb-1">Paid Purchase Bills</h2>
+        <p class="text-muted">History of settled vendor invoices and procurement payments.</p>
+    </div>
+    <div class="col-md-6 text-md-end no-print">
+        <a asp-controller="Reports" asp-action="Index" class="btn btn-light rounded-pill px-4">
+            <span class="material-symbols-outlined align-middle me-1">arrow_back</span> Back to Analytics
+        </a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm bg-light p-5 text-center rounded-4">
+        <span class="material-symbols-outlined display-1 mb-3 text-muted">history</span>
+        <h2 class="fw-bold">No History Found</h2>
+        <p class="lead mb-0 text-muted">There are no fully paid purchase bills to display in this report.</p>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm overflow-hidden mb-5">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Reference</th>
+                        <th>Supplier</th>
+                        <th class="text-end">Paid Amount</th>
+                        <th class="text-end">Total Billed</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center pe-4 no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var invoice in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <a asp-controller="Purchase" asp-action="Details" asp-route-id="@invoice.Id" class="text-decoration-none">
+                                    <div class="fw-bold fs-6">@invoice.InvoiceNumber</div>
+                                    <div class="text-muted x-small">@invoice.InvoiceDate.ToString("dd MMM yyyy")</div>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-bold small">@invoice.Supplier?.Name</div>
+                                <div class="text-muted x-small">Vendor</div>
+                            </td>
+                            <td class="text-end text-success fw-bold">@invoice.PaidAmount.ToString("C")</td>
+                            <td class="text-end text-muted">@invoice.GrandTotal.ToString("C")</td>
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success">
+                                    Settled
+                                </span>
+                            </td>
+                            <td class="text-center pe-4 no-print">
+                                <a asp-controller="Purchase" asp-action="Details" asp-route-id="@invoice.Id" class="btn btn-light btn-sm text-info" title="View Details">
+                                    <span class="material-symbols-outlined" style="font-size: 1.2rem">task_alt</span>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="bg-light border-top border-2 fw-bold">
+                    <tr>
+                        <td colspan="2" class="ps-4 py-3">CUMULATIVE SETTLEMENTS</td>
+                        <td class="text-end text-success">@Model.Sum(i => i.PaidAmount).ToString("C")</td>
+                        <td class="text-end text-muted">@Model.Sum(i => i.GrandTotal).ToString("C")</td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+}
+
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+    }
+</style>

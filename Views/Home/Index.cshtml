@@ -1,0 +1,198 @@
+﻿@model Grevity.Models.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Summary Dashboard";
+}
+
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="h3 mb-1">Financial Overview</h2>
+        <p class="text-muted">Monitor your business performance at a glance.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Total Sales Card -->
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm" style="border-left: 5px solid var(--md-success) !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Total Revenue</div>
+                        <h2 class="mb-0">@Model.TotalSales.ToString("C0")</h2>
+                    </div>
+                    <div class="p-2 rounded-3 bg-opacity-10 bg-success text-success">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                </div>
+                <div class="small text-success fw-bold d-flex align-items-center">
+                    <span class="material-symbols-outlined me-1" style="font-size: 1rem">trending_up</span>
+                    <span>12% Increase</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoices Card -->
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm" style="border-left: 5px solid var(--md-primary) !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Total Invoices</div>
+                        <h2 class="mb-0">@Model.TotalInvoices</h2>
+                    </div>
+                    <div class="p-2 rounded-3 bg-opacity-10 bg-primary text-primary">
+                        <span class="material-symbols-outlined">description</span>
+                    </div>
+                </div>
+                <div class="small text-muted fw-bold">Active Billing</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Card -->
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm" style="border-left: 5px solid var(--md-info) !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Customers</div>
+                        <h2 class="mb-0">@Model.TotalCustomers</h2>
+                    </div>
+                    <div class="p-2 rounded-3 bg-opacity-10 bg-info text-info">
+                        <span class="material-symbols-outlined">groups</span>
+                    </div>
+                </div>
+                <div class="small text-muted fw-bold d-flex align-items-center">
+                    <span class="material-symbols-outlined me-1" style="font-size: 1rem">verified</span>
+                    <span>Trusted Base</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Card -->
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm" style="border-left: 5px solid var(--md-warning) !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Active Items</div>
+                        <h2 class="mb-0">@Model.TotalProducts</h2>
+                    </div>
+                    <div class="p-2 rounded-3 bg-opacity-10 bg-warning text-warning">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                    </div>
+                </div>
+                <div class="small text-muted fw-bold">Inventory Count</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Quick Actions -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Business Toolkit</h5>
+                <span class="badge bg-purple-light">Quick Utilities</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a asp-controller="Invoice" asp-action="Create" class="btn btn-outline-primary d-flex flex-column align-items-center p-4 h-100 rounded-4">
+                            <span class="material-symbols-outlined mb-2" style="font-size: 2.5rem">add_circle</span>
+                            <span>Sales Invoice</span>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a asp-controller="Purchase" asp-action="Create" class="btn btn-outline-info d-flex flex-column align-items-center p-4 h-100 rounded-4">
+                            <span class="material-symbols-outlined mb-2" style="font-size: 2.5rem">shopping_basket</span>
+                            <span>Purchase Bill</span>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a asp-controller="Product" asp-action="Create" class="btn btn-outline-success d-flex flex-column align-items-center p-4 h-100 rounded-4">
+                            <span class="material-symbols-outlined mb-2" style="font-size: 2.5rem">inventory</span>
+                            <span>Add Product</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-3">
+                    <h6 class="text-muted fw-bold text-uppercase mb-3 ls-1">Analytics Reports</h6>
+                    <div class="list-group list-group-flush border-top">
+                        <a asp-controller="Reports" asp-action="SalesReport" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-0">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined text-primary me-3">assessment</span>
+                                <span>Detailed Sales Analysis</span>
+                            </div>
+                            <span class="material-symbols-outlined text-muted">chevron_right</span>
+                        </a>
+                        <a asp-controller="Reports" asp-action="PurchaseReport" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-0">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined text-info me-3">query_stats</span>
+                                <span>Comprehensive Purchase Logs</span>
+                            </div>
+                            <span class="material-symbols-outlined text-muted">chevron_right</span>
+                        </a>
+                        <a asp-controller="Reports" asp-action="ConsolidatedReport" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-0">
+                            <div class="d-flex align-items-center">
+                                <span class="material-symbols-outlined text-success me-3">account_balance</span>
+                                <span>Global Financial Statement</span>
+                            </div>
+                            <span class="material-symbols-outlined text-muted">chevron_right</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column Activity -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-primary bg-opacity-10 rounded-top-md">
+                <h5 class="mb-0 text-primary">Activity Stream</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="p-4 text-center border-bottom bg-light">
+                    <span class="material-symbols-outlined text-muted" style="font-size: 4rem">monitoring</span>
+                    <p class="text-muted mt-2 small">Real-time tracking of invoices and master data changes.</p>
+                </div>
+                <div class="p-4">
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                            <span class="material-symbols-outlined text-primary" style="font-size: 1.2rem">history</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold small">System Audit Active</div>
+                            <div class="text-muted x-small">Continuous logging enabled</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start">
+                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                            <span class="material-symbols-outlined text-success" style="font-size: 1.2rem">lock_outline</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold small">Secure Session</div>
+                            <div class="text-muted x-small">Encrypted environment</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0 text-center pb-4">
+                <a asp-controller="AuditLogs" asp-action="Index" class="btn btn-sm btn-link text-primary fw-bold text-decoration-none">VIEW ALL LOGS</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.05em; }
+    .rounded-top-md { border-top-left-radius: var(--radius-md) !important; border-top-right-radius: var(--radius-md) !important; }
+    .list-group-item { background: transparent; border-color: var(--border-color); }
+    .list-group-item:hover { background: #fcfcfd; }
+</style>

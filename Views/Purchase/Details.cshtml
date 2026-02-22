@@ -1,0 +1,176 @@
+@model Grevity.Models.Entities.Invoice
+
+@{
+    ViewData["Title"] = "Purchase Bill: " + Model.InvoiceNumber;
+}
+
+<div class="row mb-4 align-items-center no-print">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Purchases</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.InvoiceNumber</li>
+            </ol>
+        </nav>
+        <h2 class="h3 mb-0 fw-bold">Procurement Record</h2>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="d-flex gap-2 justify-content-md-end">
+            <a asp-controller="Purchase" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-light rounded-pill px-3" hx-boost="false">
+                <span class="material-symbols-outlined align-middle me-1">edit</span> Edit
+            </a>
+            @if (Model.Stage == Grevity.Models.Entities.DocumentStage.Order)
+            {
+                <form asp-action="ConvertStage" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input type="hidden" name="newStage" value="@Grevity.Models.Entities.DocumentStage.Invoice" />
+                    <button type="submit" class="btn btn-purple rounded-pill px-3 shadow-sm fw-bold">
+                        <span class="material-symbols-outlined align-middle me-1">receipt</span> Generate Bill
+                    </button>
+                </form>
+            }
+            <button onclick="window.print()" class="btn btn-primary rounded-pill px-3 shadow-sm">
+                <span class="material-symbols-outlined align-middle me-1">print</span> Print
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Stepper -->
+<div class="card border-0 shadow-sm rounded-4 mb-4 no-print overflow-hidden">
+    <div class="card-body p-0">
+        <div class="d-flex align-items-stretch text-center">
+            @{
+                var stages = new[] { 
+                    (Stage: Grevity.Models.Entities.DocumentStage.Draft, Label: "Draft", Icon: "draw"),
+                    (Stage: Grevity.Models.Entities.DocumentStage.Order, Label: "P. Order", Icon: "order_play"),
+                    (Stage: Grevity.Models.Entities.DocumentStage.Invoice, Label: "P. Bill", Icon: "fact_check")
+                };
+            }
+            @foreach (var stage in stages)
+            {
+                var isActive = Model.Stage >= stage.Stage;
+                var isCurrent = Model.Stage == stage.Stage;
+                <div class="flex-grow-1 p-3 @(isActive ? "bg-purple-light text-primary" : "text-muted") @(isCurrent ? "border-bottom border-primary border-3" : "")">
+                    <span class="material-symbols-outlined mb-1" style="font-size: 1.8rem">@stage.Icon</span>
+                    <div class="x-small fw-bold text-uppercase ls-1">@stage.Label</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow rounded-4 p-5 invoice-document">
+    <!-- Document Header -->
+    <div class="row align-items-start mb-5 pb-4 border-bottom">
+        <div class="col-8">
+            <h6 class="text-muted x-small text-uppercase ls-1 fw-bold mb-3 text-primary">Vendor Profile:</h6>
+            <h1 class="h2 fw-bold mb-1">@(Model.Supplier?.Name)</h1>
+            <p class="text-muted small mb-0">
+                @(Model.Supplier?.Address)<br>
+                <strong>GSTIN:</strong> @(Model.Supplier?.GSTIN) | <strong>Contact:</strong> @(Model.Supplier?.Mobile)
+            </p>
+        </div>
+        <div class="col-4 text-end">
+            <div class="badge bg-dark bg-opacity-10 text-dark px-3 py-2 mb-3 rounded-pill text-uppercase ls-1 x-small fw-bold">
+                Purchase Document
+            </div>
+            <h4 class="fw-bold mb-0">Ref #@Model.InvoiceNumber</h4>
+            <div class="text-muted small">Date: @Model.InvoiceDate.ToString("dd MMM yyyy")</div>
+            <div class="text-muted x-small mt-2 font-monospace">INTERNAL RECORD</div>
+        </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="table-responsive mb-4">
+        <table class="table table-borderless table-striped align-middle">
+            <thead class="bg-dark bg-opacity-10 text-dark">
+                <tr>
+                    <th class="ps-3 py-3 x-small text-uppercase ls-1">Product Description</th>
+                    <th class="py-3 x-small text-uppercase ls-1">HSN/SAC</th>
+                    <th class="py-3 x-small text-uppercase ls-1 text-center">Qty</th>
+                    <th class="py-3 x-small text-uppercase ls-1 text-end">Unit Price</th>
+                    @if (ViewBag.IsGSTEnabled != false)
+                    {
+                        <th class="py-3 x-small text-uppercase ls-1 text-end">Gst %</th>
+                    }
+                    <th class="py-3 x-small text-uppercase ls-1 text-end pe-3">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.InvoiceItems)
+                {
+                    <tr>
+                        <td class="ps-3 py-3 fw-bold">@item.ProductName</td>
+                        <td class="text-muted">@item.HSN</td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">@item.UnitPrice.ToString("N2")</td>
+                        @if (ViewBag.IsGSTEnabled != false)
+                        {
+                            <td class="text-end text-muted">@item.GSTPercentage%</td>
+                        }
+                        <td class="text-end fw-bold pe-3">@item.TotalAmount.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals Area -->
+    <div class="row pt-4 border-top border-2">
+        <div class="col-md-7">
+            <div class="p-4 rounded-4 bg-light h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="material-symbols-outlined text-primary me-2">account_balance</span>
+                    <h6 class="fw-bold small text-uppercase ls-1 mb-0">Accounting Impact</h6>
+                </div>
+                <div class="small text-muted"> This transaction increases inventory assets and trade payables. Ensure vendor GSTIN is verified for ITC claims.</div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="table-responsive">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted small ps-0">Net Amount</td>
+                        <td class="text-end fw-bold pe-0">@( (Model.GrandTotal - Model.TaxAmount + Model.DiscountAmount).ToString("C") )</td>
+                    </tr>
+                    @if (ViewBag.IsGSTEnabled != false)
+                    {
+                        <tr>
+                            <td class="text-muted small ps-0">Input Tax (+)</td>
+                            <td class="text-end fw-bold pe-0 text-success">@Model.TaxAmount.ToString("C")</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td class="text-muted small ps-0">Rebate (-)</td>
+                        <td class="text-end fw-bold pe-0 text-danger">@Model.DiscountAmount.ToString("C")</td>
+                    </tr>
+                    <tr class="border-top">
+                        <td class="h5 fw-bold text-dark ps-0 pt-3">Final Ledger Amt</td>
+                    </tr>
+                </table>
+                <div class="text-muted x-small text-end mt-2 fst-italic">Rupees @Grevity.Helpers.NumberToWords.Convert(Model.GrandTotal) Only</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+    .invoice-document { min-height: 700px; }
+    @@media print {
+        .no-print { display: none !important; }
+        .card { border: none !important; box-shadow: none !important; padding: 0 !important; border-radius: 0 !important; }
+        .invoice-document { box-shadow: none !important; border: 1px solid #eee !important; border-radius: 0 !important; }
+        body { background: white !important; }
+        .main-content { padding: 0 !important; }
+    }
+</style>
+
+<style>
+    @@media print {
+        .no-print { display: none; }
+        .card { border: none !important; box-shadow: none !important; }
+    }
+</style>

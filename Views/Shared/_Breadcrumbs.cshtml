@@ -1,0 +1,34 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<nav aria-label="breadcrumb" class="mt-2 no-print">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+        
+        @if (controller != "Home")
+        {
+            <li class="breadcrumb-item">
+                <a asp-controller="@controller" asp-action="Index">@controller</a>
+            </li>
+        }
+
+        @if (action != "Index")
+        {
+            <li class="breadcrumb-item active" aria-current="page">@action</li>
+        }
+    </ol>
+</nav>
+
+<style>
+    .breadcrumb {
+        background: transparent;
+        padding-left: 0;
+    }
+    
+    @@media print {
+        .no-print { display: none; }
+    }
+</style>

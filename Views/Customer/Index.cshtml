@@ -1,0 +1,82 @@
+@model IEnumerable<Grevity.Models.Entities.Customer>
+
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<div class="card border-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+        <h4 class="mb-0">Customers</h4>
+        <div class="d-flex gap-2">
+            <a asp-action="Import" class="btn btn-light d-flex align-items-center text-primary">
+                <span class="material-symbols-outlined me-2">upload_file</span> Import
+            </a>
+            <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+                <span class="material-symbols-outlined me-2">person_add</span> Add New Customer
+            </a>
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <div class="row pt-4 mb-4">
+            <div class="col-md-6">
+                <form method="get" class="d-flex position-relative">
+                    <span class="material-symbols-outlined position-absolute translate-middle-y top-50 ms-3 text-muted">search</span>
+                    <input type="text" name="searchTerm" class="form-control ps-5 border-0 bg-light rounded-pill" placeholder="Search by name, mobile or email..." value="@Context.Request.Query["searchTerm"]">
+                    @if (!string.IsNullOrEmpty(Context.Request.Query["searchTerm"]))
+                    {
+                        <a asp-action="Index" class="btn btn-link text-muted position-absolute end-0 top-50 translate-middle-y me-2">
+                            <span class="material-symbols-outlined">close</span>
+                        </a>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Customer Name</th>
+                        <th>Contact Info</th>
+                        <th>Tax Details</th>
+                        <th class="text-center pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-circle bg-purple-light text-primary me-3">
+                                        <span class="material-symbols-outlined" style="font-size: 1.25rem">person</span>
+                                    </div>
+                                    <div class="fw-bold fs-6">@item.Name</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small fw-bold">@item.Mobile</div>
+                                <div class="text-muted small">@item.Email</div>
+                            </td>
+                            <td><span class="badge bg-light text-primary border border-primary border-opacity-25">@item.GSTIN</span></td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-info" title="View Details">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">visibility</span>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-warning" title="Edit">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">edit</span>
+                                    </a>
+                                    <button type="button" class="btn btn-light btn-sm d-flex align-items-center text-danger" title="Delete"
+                                            onclick="confirmDelete('@Url.Action("Delete", new { id = item.Id })', 'Do you want to delete customer @item.Name?')">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

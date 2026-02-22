@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Import Customers";
+}
+
+<div class="container mt-4">
+    <h2>Import Customers</h2>
+    <hr />
+    
+    <div class="alert alert-info">
+        <p>Please upload an Excel file with the following columns in order (Row 1 is Header):</p>
+        <strong>Name, Mobile, Email, Address, GSTIN, Opening Balance</strong>
+    </div>
+
+    <form asp-action="Import" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Excel File</label>
+            <input type="file" name="file" class="form-control" accept=".xlsx, .xls" required />
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Upload & Import</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>

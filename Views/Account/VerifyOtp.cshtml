@@ -1,0 +1,38 @@
+@model Grevity.Models.ViewModels.VerifyOtpViewModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Verify OTP";
+}
+
+<div class="text-center mb-4">
+    <span class="material-symbols-outlined text-primary mb-2" style="font-size: 3rem">verified_user</span>
+    <h3 class="fw-bold">Verify OTP</h3>
+    <p class="text-muted small">Please enter the code sent to <strong>@Model.Email</strong></p>
+</div>
+
+<form asp-action="VerifyOtp" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="Email" />
+    
+    <div class="mb-4">
+        <label asp-for="Otp" class="form-label fw-semibold">OTP Code</label>
+        <input asp-for="Otp" class="form-control text-center fs-4 fw-bold" placeholder="••••••" maxlength="6" autocomplete="off" />
+        <span asp-validation-for="Otp" class="text-danger small"></span>
+    </div>
+    
+    <div class="d-grid mb-4">
+        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Verify & Proceed</button>
+    </div>
+</form>
+
+<div class="text-center">
+    <form asp-action="ForgotPassword" method="post" class="d-inline">
+        <input type="hidden" name="Email" value="@Model.Email" />
+        <p class="text-muted small mb-0">Didn't receive code? <button type="submit" class="btn btn-link btn-sm p-0 align-baseline fw-bold text-decoration-none">Resend OTP</button></p>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

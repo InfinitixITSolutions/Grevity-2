@@ -1,0 +1,144 @@
+@model IEnumerable<Grevity.Models.Entities.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="card border-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+        <h4 class="mb-0">Products</h4>
+        <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+            <span class="material-symbols-outlined me-2">add_box</span> Add New Product
+        </a>
+    </div>
+    <div class="card-body pt-0">
+        <div class="row pt-4 mb-4">
+            <div class="col-md-6">
+                <form method="get" class="d-flex position-relative">
+                    <span class="material-symbols-outlined position-absolute translate-middle-y top-50 ms-3 text-muted">search</span>
+                    <input type="text" name="searchTerm" class="form-control ps-5 border-0 bg-light rounded-pill" placeholder="Search by name or HSN..." value="@Context.Request.Query["searchTerm"]">
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Product Info</th>
+                        <th>HSN Code</th>
+                        <th>Unit</th>
+                        <th class="text-center">Composition</th>
+                        <th class="text-end">Base Price</th>
+                        <th class="text-center pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-circle bg-purple-light text-primary me-3">
+                                        <span class="material-symbols-outlined" style="font-size: 1.25rem">inventory_2</span>
+                                    </div>
+                                    <div class="fw-bold fs-6">@item.Name</div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-light text-primary border border-primary border-opacity-10">@item.HSN</span></td>
+                            <td>@item.Unit</td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-outline-primary shadow-sm" 
+                                        onclick="viewComposition(@item.Id, '@item.Name')">
+                                    <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle">list</span>
+                                    Check
+                                </button>
+                            </td>
+                            <td class="text-end fw-bold">@(item.Price?.ToString("C") ?? "₹0.00")</td>
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-info" title="View Details">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">visibility</span>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light btn-sm d-flex align-items-center text-warning" title="Edit">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">edit</span>
+                                    </a>
+                                    <button type="button" class="btn btn-light btn-sm d-flex align-items-center text-danger" title="Delete"
+                                            onclick="confirmDelete('@Url.Action("Delete", new { id = item.Id })', 'Do you want to delete product @item.Name?')">
+                                        <span class="material-symbols-outlined" style="font-size: 1.2rem">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Composition Modal -->
+<div class="modal fade" id="compositionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="compositionModalLabel">Product Composition</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="compositionContent">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function viewComposition(productId, productName) {
+        document.getElementById('compositionModalLabel').textContent = productName + ' - Composition';
+        document.getElementById('compositionContent').innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+        
+        var modal = new bootstrap.Modal(document.getElementById('compositionModal'));
+        modal.show();
+        
+        fetch('/Product/GetComposition?id=' + productId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    document.getElementById('compositionContent').innerHTML = '<div class="alert alert-light text-center border-0 py-4"><span class="material-symbols-outlined d-block mb-2 fs-1 text-muted">inventory_2</span>This product has no sub-product composition.</div>';
+                    return;
+                }
+                
+                let html = '<div class="list-group list-group-flush border rounded-4 overflow-hidden">';
+                data.forEach(item => {
+                    html += `
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <div class="fw-bold">${item.subProductName}</div>
+                                <small class="text-muted">Stock: ${item.currentStock} ${item.unit}</small>
+                            </div>
+                            <span class="badge bg-purple bg-opacity-10 text-purple rounded-pill px-3 py-2 fs-6 fw-bold">
+                                ${item.requiredQuantity} ${item.unit}
+                            </span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                document.getElementById('compositionContent').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('compositionContent').innerHTML = '<div class="alert alert-danger rounded-4 border-0">Error loading composition metrics.</div>';
+            });
+    }
+</script>

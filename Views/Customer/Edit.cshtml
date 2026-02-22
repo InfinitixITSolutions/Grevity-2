@@ -1,0 +1,116 @@
+@model Grevity.Models.Entities.Customer
+
+@{
+    ViewData["Title"] = "Partner Revision: " + Model.Name;
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-9">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2 class="h3 mb-1 fw-bold">Modify Partner</h2>
+                <p class="text-muted mb-0">Adjusting commercial and contact parameters for Customer ID #@Model.Id.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-light rounded-pill px-3">
+                    <span class="material-symbols-outlined align-middle me-1">visibility</span> Profile Insights
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white p-4 border-0 pb-0">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <div class="d-flex align-items-center">
+                        <span class="material-symbols-outlined text-primary me-2">edit_square</span>
+                        <h5 class="mb-0 fw-bold text-dark">Entity Update</h5>
+                    </div>
+                    <span class="badge bg-light text-muted border px-3 py-2 rounded-pill small">ENLISTED: @Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+                </div>
+                <p class="text-muted small mb-0">Modified attributes will be applied to all future transaction vouchers.</p>
+            </div>
+            <div class="card-body p-4 pt-4">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="CreatedAt" />
+                    <input type="hidden" asp-for="CompanyId" />
+
+                    <div class="row g-4 mb-4">
+                        <!-- Primary Info -->
+                        <div class="col-md-7">
+                            <label asp-for="Name" class="form-label small fw-bold text-muted text-uppercase ls-1">Legal Entity / Individual Name *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">person</span></span>
+                                <input asp-for="Name" class="form-control bg-light border-0 fw-bold" placeholder="Entity Identifier" required />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger x-small"></span>
+                        </div>
+                        
+                        @if (ViewBag.IsGSTEnabled != false)
+                        {
+                            <div class="col-md-5">
+                                <label asp-for="GSTIN" class="form-label small fw-bold text-muted text-uppercase ls-1">Tax ID (GSTIN)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">assignment_ind</span></span>
+                                    <input asp-for="GSTIN" class="form-control bg-light border-0 fw-bold" placeholder="Statutory Reference" />
+                                </div>
+                                <span asp-validation-for="GSTIN" class="text-danger x-small"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="GSTIN" />
+                        }
+
+                        <!-- Communication -->
+                        <div class="col-md-6">
+                            <label asp-for="Mobile" class="form-label small fw-bold text-muted text-uppercase ls-1">Contact Number *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">call</span></span>
+                                <input asp-for="Mobile" class="form-control bg-light border-0 fw-bold" placeholder="Active line" required />
+                            </div>
+                            <span asp-validation-for="Mobile" class="text-danger x-small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label small fw-bold text-muted text-uppercase ls-1">Correspondence Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><span class="material-symbols-outlined fs-5">mail</span></span>
+                                <input asp-for="Email" class="form-control bg-light border-0 fw-bold" placeholder="Official inbox" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger x-small"></span>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="col-md-12">
+                            <label asp-for="Address" class="form-label small fw-bold text-muted text-uppercase ls-1">Registered Business Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 align-items-start pt-2"><span class="material-symbols-outlined fs-5">location_on</span></span>
+                                <textarea asp-for="Address" class="form-control bg-light border-0 fw-bold" rows="3" placeholder="Global location details..."></textarea>
+                            </div>
+                            <span asp-validation-for="Address" class="text-danger x-small"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center justify-content-between border-top pt-4">
+                        <button type="submit" class="btn btn-purple btn-lg rounded-pill px-5 shadow-lg fw-bold">
+                            <span class="material-symbols-outlined align-middle me-1">update</span> Commit Revisions
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.1em; }
+    .x-small { font-size: 0.75rem; }
+    .form-control { border-radius: 0.85rem; padding: 0.75rem 1rem; }
+    .input-group-text { border-radius: 0.85rem 0 0 0.85rem; }
+    .input-group .form-control { border-radius: 0 0.85rem 0.85rem 0; }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

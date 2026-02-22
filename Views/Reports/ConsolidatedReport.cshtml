@@ -1,0 +1,180 @@
+@{
+    ViewData["Title"] = "Global Financial Overview";
+}
+
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="h3 mb-1">Global Financial Health</h2>
+        <p class="text-muted">Consolidated summary of receivables, payables, and turnover.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="border-top: 5px solid var(--md-success) !important;">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h6 class="text-muted small fw-bold text-uppercase ls-1 mb-0">Receivables (Asset)</h6>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Total Collections:</span>
+                    <h3 class="text-success mb-0">@ViewBag.TotalReceived.ToString("C")</h3>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">Active Debts (Customers):</span>
+                    <h3 class="text-danger mb-0">@ViewBag.TotalReceivable.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="border-top: 5px solid var(--md-warning) !important;">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h6 class="text-muted small fw-bold text-uppercase ls-1 mb-0">Payables (Liability)</h6>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Total Payments made:</span>
+                    <h3 class="text-secondary mb-0">@ViewBag.TotalPaid.ToString("C")</h3>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">Vendor Obligations:</span>
+                    <h3 class="text-danger mb-0">@ViewBag.TotalPayable.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm bg-purple-light overflow-hidden">
+            <div class="card-body p-5">
+                <div class="row align-items-center text-center">
+                    <div class="col-md-5 border-end border-primary border-opacity-10">
+                        <label class="small fw-bold text-primary text-uppercase ls-1 d-block mb-2">Total Invoiced Sales</label>
+                        <h1 class="text-primary mb-0 display-5 fw-bold">@ViewBag.TotalSales.ToString("C")</h1>
+                    </div>
+                    <div class="col-md-2 p-4">
+                        <div class="rounded-circle bg-white d-inline-flex p-3 shadow-sm">
+                            <span class="material-symbols-outlined text-primary" style="font-size: 2.5rem">compare_arrows</span>
+                        </div>
+                    </div>
+                    <div class="col-md-5 border-start border-primary border-opacity-10">
+                        <label class="small fw-bold text-info text-uppercase ls-1 d-block mb-2">Total Billed Purchases</label>
+                        <h1 class="text-info mb-0 display-5 fw-bold">@ViewBag.TotalPurchases.ToString("C")</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-0 bg-white pt-4 px-4">
+                <h6 class="fw-bold mb-0 text-danger d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2">arrow_upward</span> Top Customer Dues
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 mt-3">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Entity</th>
+                            <th class="text-end pe-4">Current Due</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.TopCustomers != null)
+                        {
+                            foreach (var customer in ViewBag.TopCustomers)
+                            {
+                                <tr>
+                                    <td class="ps-4">@customer.Name</td>
+                                    <td class="text-end pe-4 fw-bold text-danger">@customer.CurrentBalance.ToString("C")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-0 bg-white pt-4 px-4">
+                <h6 class="fw-bold mb-0 text-dark d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2">arrow_downward</span> Top Vendor Balances
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 mt-3">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Partner</th>
+                            <th class="text-end pe-4">Current Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.TopSuppliers != null)
+                        {
+                            foreach (var supplier in ViewBag.TopSuppliers)
+                            {
+                                <tr>
+                                    <td class="ps-4">@supplier.Name</td>
+                                    <td class="text-end pe-4 fw-bold text-dark">@supplier.CurrentBalance.ToString("C")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 bg-dark text-white p-5 rounded-4 overflow-hidden position-relative">
+            <div class="position-absolute end-0 top-0 opacity-10" style="font-size: 15rem; margin-top: -2rem; margin-right: -2rem">
+                <span class="material-symbols-outlined">track_changes</span>
+            </div>
+            <div class="row justify-content-between align-items-center">
+                <div class="col-md-7">
+                    <h2 class="fw-bold display-6 mb-3">Balance Sheet Accuracy</h2>
+                    <p class="lead mb-0 text-white-50">Continuous monitoring of ledger integrity. All calculations are performed in real-time based on verified transactions.</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="bg-white bg-opacity-10 p-4 rounded-4 text-center">
+                        <label class="small fw-bold text-uppercase d-block mb-2 ls-1 text-white-50">Net Financial Position</label>
+                        <h2 class="mb-0 @(ViewBag.TotalReceivable > ViewBag.TotalPayable ? "text-success" : "text-danger") display-6 fw-bold">
+                            @((ViewBag.TotalReceivable - ViewBag.TotalPayable).ToString("C"))
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 no-print d-flex gap-3">
+    <button class="btn btn-primary d-flex align-items-center px-4" onclick="window.print()">
+        <span class="material-symbols-outlined me-2">print</span> Print Full Statement
+    </button>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-light d-flex align-items-center px-4">
+        <span class="material-symbols-outlined me-2">home</span> Return Home
+    </a>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 0.05em; }
+    @@media print {
+        .no-print { display: none !important; }
+        .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+        .bg-dark { background: #000 !important; color: #fff !important; }
+    }
+</style>
