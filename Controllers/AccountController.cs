@@ -110,7 +110,7 @@ namespace Grevity.Controllers
             var defaultCompany = new BusinessSetting
             {
                 CompanyName = $"{user.Username}'s Company",
-                CurrentFinancialYear = "2024-2025"
+                CurrentFinancialYear = $"{(DateTime.Now.Month >= 4 ? DateTime.Now.Year : DateTime.Now.Year - 1)}-{(DateTime.Now.Month >= 4 ? DateTime.Now.Year + 1 : DateTime.Now.Year)}"
             };
             await _companyRepository.AddAsync(defaultCompany);
 

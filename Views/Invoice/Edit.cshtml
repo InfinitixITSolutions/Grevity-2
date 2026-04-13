@@ -338,14 +338,23 @@
             calculateGrandTotal();
         }
 
-        window.onload = function() {
+        function initPage() {
+            const itemsBody = document.getElementById('itemsBody');
+            if (!itemsBody) return;
+
+            itemsBody.innerHTML = '';
+            itemIndex = 0;
+
             if (existingItems && existingItems.length > 0) {
                 existingItems.forEach(item => addItem(item));
             } else {
                 addItem();
             }
             calculateGrandTotal();
-        };
+        }
+
+        window.onload = initPage;
+        document.addEventListener('htmx:afterSwap', initPage);
     </script>
 }
 
