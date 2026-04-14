@@ -30,6 +30,15 @@ namespace Grevity.Controllers
             _companyContext = companyContext;
         }
 
+        private async Task<bool> UserOwnsCompany(int companyId)
+        {
+            var userIdStr = User.FindFirst("UserId")?.Value;
+            if (!int.TryParse(userIdStr, out int userId)) return false;
+
+            var links = await _userCompanyRepository.GetAllAsync();
+            return links.Any(uc => uc.UserId == userId && uc.BusinessSettingId == companyId);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Index(int? id)
         {
@@ -50,6 +59,11 @@ namespace Grevity.Controllers
                     {
                         id = activeId;
                     }
+                }
+
+                if (id.HasValue && id.Value > 0 && !await UserOwnsCompany(id.Value))
+                {
+                    return Forbid();
                 }
 
                 settings = await _settingService.GetSettingsAsync(id);
@@ -111,6 +125,11 @@ namespace Grevity.Controllers
                 BusinessSetting? existing = null;
                 if (model.Id > 0)
                 {
+                    if (!await UserOwnsCompany(model.Id))
+                    {
+                        return Forbid();
+                    }
+
                     existing = await _settingService.GetSettingsAsync(model.Id, asNoTracking: true);
                 }
 
@@ -223,6 +242,11 @@ namespace Grevity.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            if (!await UserOwnsCompany(id))
+            {
+                return Forbid();
+            }
+
             try
             {
                 await _settingService.DeleteSettingsAsync(id);

@@ -1,2 +1,12 @@
 /.idea
 /.vs
+/.vscode
+/bin
+/obj
+.DS_Store
+*.user
+*.suo
+*.dbmdl
+TestResults/
+/Properties/launchSettings.json
+/appsettings.Swapnil.json

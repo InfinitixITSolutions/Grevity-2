@@ -36,6 +36,7 @@ namespace Grevity.Services.Implementations
         {
             return await _context.Invoices
                 .Include(i => i.Customer)
+                .Include(i => i.Supplier)
                 .OrderByDescending(i => i.InvoiceDate)
                 .ToListAsync();
         }
@@ -44,6 +45,7 @@ namespace Grevity.Services.Implementations
         {
             return await _context.Invoices
                 .Include(i => i.Customer)
+                .Include(i => i.Supplier)
                 .Include(i => i.InvoiceItems)
                 .ThenInclude(it => it.Product)
                 .FirstOrDefaultAsync(i => i.Id == id);
@@ -82,7 +84,10 @@ namespace Grevity.Services.Implementations
                 try
                 {
                     invoice.InvoiceNumber = await GenerateInvoiceNumberAsync();
-                    invoice.InvoiceDate = DateTime.Now;
+                    if (invoice.InvoiceDate == default)
+                    {
+                        invoice.InvoiceDate = DateTime.Now;
+                    }
                     
                     decimal totalAmount = 0;
                     decimal totalTax = 0;
@@ -417,10 +422,53 @@ namespace Grevity.Services.Implementations
 
         public async Task DeleteInvoiceAsync(int id)
         {
-            var invoice = await _invoiceRepository.GetByIdAsync(id);
-            if (invoice != null)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                await _invoiceRepository.DeleteAsync(id);
+                var invoice = await _context.Invoices
+                    .Include(i => i.InvoiceItems)
+                    .FirstOrDefaultAsync(i => i.Id == id);
+
+                if (invoice == null)
+                {
+                    return;
+                }
+
+                if (invoice.Stage == DocumentStage.Invoice)
+                {
+                    foreach (var item in invoice.InvoiceItems)
+                    {
+                        await UpdateProductAndSubProductStockAsync(item, invoice.InvoiceType, true);
+                    }
+
+                    if (invoice.CustomerId.HasValue)
+                    {
+                        var customer = await _customerRepository.GetByIdAsync(invoice.CustomerId.Value);
+                        if (customer != null)
+                        {
+                            customer.CurrentBalance -= (invoice.GrandTotal - invoice.PaidAmount);
+                        }
+                    }
+                    else if (invoice.SupplierId.HasValue)
+                    {
+                        var supplier = await _supplierRepository.GetByIdAsync(invoice.SupplierId.Value);
+                        if (supplier != null)
+                        {
+                            supplier.CurrentBalance -= (invoice.GrandTotal - invoice.PaidAmount);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+
+                _context.Invoices.Remove(invoice);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 

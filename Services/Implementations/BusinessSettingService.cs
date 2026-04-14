@@ -68,6 +68,8 @@ namespace Grevity.Services.Implementations
             _context.InvoiceItems.RemoveRange(_context.InvoiceItems.IgnoreQueryFilters().Where(i => i.CompanyId == id));
             _context.Invoices.RemoveRange(_context.Invoices.IgnoreQueryFilters().Where(i => i.CompanyId == id));
             _context.PaymentTransactions.RemoveRange(_context.PaymentTransactions.IgnoreQueryFilters().Where(i => i.CompanyId == id));
+            _context.ProductSubProductMappings.RemoveRange(_context.ProductSubProductMappings.IgnoreQueryFilters().Where(m => m.CompanyId == id));
+            _context.SubProducts.RemoveRange(_context.SubProducts.IgnoreQueryFilters().Where(s => s.CompanyId == id));
             _context.Products.RemoveRange(_context.Products.IgnoreQueryFilters().Where(i => i.CompanyId == id));
             _context.Customers.RemoveRange(_context.Customers.IgnoreQueryFilters().Where(i => i.CompanyId == id));
             _context.Suppliers.RemoveRange(_context.Suppliers.IgnoreQueryFilters().Where(i => i.CompanyId == id));

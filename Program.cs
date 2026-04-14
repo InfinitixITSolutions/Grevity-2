@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Grevity.Data;
 using Grevity.Repositories.Interfaces;
 using Grevity.Repositories.Implementations;
@@ -7,7 +8,8 @@ using Grevity.Repositories.Implementations;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 
 // Database Configuration
 builder.Services.AddDbContext<AppDbContext>(options =>

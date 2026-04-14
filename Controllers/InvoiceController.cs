@@ -179,6 +179,7 @@ namespace Grevity.Controllers
             return View(invoice);
         }
 
+        [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             try 

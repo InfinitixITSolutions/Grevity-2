@@ -227,18 +227,16 @@
             
             // Trigger name setting for existing items
             const selectEl = row.querySelector('.product-select');
-            productChanged(selectEl, itemIndex);
+            productChanged(selectEl, itemIndex, existingItem != null);
             
             itemIndex++;
         }
 
-        function productChanged(select, index) {
+        function productChanged(select, index, isInitialLoad = false) {
             const option = select.options[select.selectedIndex];
             if (!option.value) return;
 
             const type = option.getAttribute('data-type');
-            const price = option.getAttribute('data-price');
-            const gst = option.getAttribute('data-gst');
             
             // Dynamically set the name to bind to either ProductId or SubProductId
             if (type === 'SubProduct') {
@@ -247,9 +245,13 @@
                 select.name = `Invoice.InvoiceItems[${index}].ProductId`;
             }
 
-            const row = select.parentNode.parentNode;
-            row.querySelector('.price-input').value = price || 0;
-            row.querySelector('.gst-input').value = gst || 0;
+            if (!isInitialLoad) {
+                const price = option.getAttribute('data-price');
+                const gst = option.getAttribute('data-gst');
+                const row = select.parentNode.parentNode;
+                row.querySelector('.price-input').value = price || 0;
+                row.querySelector('.gst-input').value = gst || 0;
+            }
             
             calculateRow(index);
         }
@@ -331,14 +333,23 @@
             calculateGrandTotal();
         }
 
-        window.onload = function() {
+        function initPage() {
+            const itemsBody = document.getElementById('itemsBody');
+            if (!itemsBody) return;
+
+            itemsBody.innerHTML = '';
+            itemIndex = 0;
+
             if (existingItems && existingItems.length > 0) {
                 existingItems.forEach(item => addItem(item));
             } else {
                 addItem();
             }
             calculateGrandTotal();
-        };
+        }
+
+        window.onload = initPage;
+        document.addEventListener('htmx:afterSwap', initPage);
     </script>
 }
 

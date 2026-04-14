@@ -65,6 +65,11 @@ namespace Grevity.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (customer.CurrentBalance == 0 && customer.OpeningBalance != 0)
+                {
+                    customer.CurrentBalance = customer.OpeningBalance;
+                }
+
                 await _customerService.AddCustomerAsync(customer);
                 TempData["Success"] = "Customer created successfully!";
                 return RedirectToAction(nameof(Index));
@@ -110,6 +115,7 @@ namespace Grevity.Controllers
             return View(customer);
         }
 
+        [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             try 
@@ -158,7 +164,8 @@ namespace Grevity.Controllers
                                 Email = row.Cell(3).GetValue<string>(),
                                 Address = row.Cell(4).GetValue<string>(),
                                 GSTIN = row.Cell(5).GetValue<string>(),
-                                OpeningBalance = row.Cell(6).GetValue<decimal>()
+                                OpeningBalance = row.Cell(6).GetValue<decimal>(),
+                                CurrentBalance = row.Cell(6).GetValue<decimal>()
                             };
                             await _customerService.AddCustomerAsync(customer);
                             count++;
